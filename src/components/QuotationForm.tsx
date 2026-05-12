@@ -1,10 +1,14 @@
-import { useRef, useState } from "react";
-import type { Quotation, DiamondRow, PriceRow, QuotationStatus } from "@/lib/quotations";
+import { useRef } from "react";
+import type {
+  DiamondRow,
+  PriceRow,
+  Quotation,
+  QuotationStatus,
+} from "@/lib/quotations";
 import { QUOTATION_STATUSES } from "@/lib/quotations";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -12,7 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Trash2, Plus, Upload } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Plus, Trash2, Upload } from "lucide-react";
 
 function readFileAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -21,6 +26,27 @@ function readFileAsDataURL(file: File): Promise<string> {
     r.onerror = reject;
     r.readAsDataURL(file);
   });
+}
+
+function Row({ children }: { children: React.ReactNode }) {
+  return <div className="grid grid-cols-1 gap-3 md:grid-cols-2">{children}</div>;
+}
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <Label className="mb-1.5 block text-xs uppercase tracking-wider text-muted-foreground">
+        {label}
+      </Label>
+      {children}
+    </div>
+  );
 }
 
 function ImageField({
@@ -33,6 +59,7 @@ function ImageField({
   onChange: (v: string) => void;
 }) {
   const ref = useRef<HTMLInputElement>(null);
+
   return (
     <div>
       <Label className="mb-1.5 block text-xs uppercase tracking-wider text-muted-foreground">
@@ -50,7 +77,7 @@ function ImageField({
             <span className="text-[11px]">Upload</span>
           </div>
         )}
-        {value && (
+        {value ? (
           <button
             type="button"
             onClick={(e) => {
@@ -61,7 +88,7 @@ function ImageField({
           >
             <Trash2 className="h-3 w-3" />
           </button>
-        )}
+        ) : null}
       </div>
       <input
         ref={ref}
@@ -69,8 +96,8 @@ function ImageField({
         accept="image/*"
         className="hidden"
         onChange={async (e) => {
-          const f = e.target.files?.[0];
-          if (f) onChange(await readFileAsDataURL(f));
+          const file = e.target.files?.[0];
+          if (file) onChange(await readFileAsDataURL(file));
           e.target.value = "";
         }}
       />
@@ -85,52 +112,51 @@ export function QuotationForm({
   value: Quotation;
   onChange: (q: Quotation) => void;
 }) {
-  const [q, setQ] = useState(value);
   const update = (patch: Partial<Quotation>) => {
-    const next = { ...q, ...patch };
-    setQ(next);
-    onChange(next);
+    onChange({ ...value, ...patch });
   };
 
   const updateDiamond = (id: string, patch: Partial<DiamondRow>) =>
-    update({ diamonds: q.diamonds.map((d) => (d.id === id ? { ...d, ...patch } : d)) });
+    update({
+      diamonds: value.diamonds.map((diamond) =>
+        diamond.id === id ? { ...diamond, ...patch } : diamond,
+      ),
+    });
+
   const addDiamond = () =>
     update({
       diamonds: [
-        ...q.diamonds,
-        { id: crypto.randomUUID(), shape: "Round", size: "", qty: 1, totalWeight: 0 },
+        ...value.diamonds,
+        {
+          id: crypto.randomUUID(),
+          shape: "Round",
+          size: "",
+          qty: 1,
+          totalWeight: 0,
+        },
       ],
     });
+
   const removeDiamond = (id: string) =>
-    update({ diamonds: q.diamonds.filter((d) => d.id !== id) });
+    update({ diamonds: value.diamonds.filter((diamond) => diamond.id !== id) });
 
   const updatePrice = (id: string, patch: Partial<PriceRow>) =>
-    update({ prices: q.prices.map((p) => (p.id === id ? { ...p, ...patch } : p)) });
+    update({
+      prices: value.prices.map((price) =>
+        price.id === id ? { ...price, ...patch } : price,
+      ),
+    });
+
   const addPrice = () =>
     update({
-      prices: [...q.prices, { id: crypto.randomUUID(), description: "", amount: "" }],
+      prices: [
+        ...value.prices,
+        { id: crypto.randomUUID(), description: "", amount: "" },
+      ],
     });
+
   const removePrice = (id: string) =>
-    update({ prices: q.prices.filter((p) => p.id !== id) });
-
-  const Row = ({ children }: { children: React.ReactNode }) => (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">{children}</div>
-  );
-
-  const Field = ({
-    label,
-    children,
-  }: {
-    label: string;
-    children: React.ReactNode;
-  }) => (
-    <div>
-      <Label className="mb-1.5 block text-xs uppercase tracking-wider text-muted-foreground">
-        {label}
-      </Label>
-      {children}
-    </div>
-  );
+    update({ prices: value.prices.filter((price) => price.id !== id) });
 
   return (
     <div className="space-y-8">
@@ -138,38 +164,60 @@ export function QuotationForm({
         <h3 className="mb-3 font-display text-lg">Customer & Quote Info</h3>
         <Row>
           <Field label="Quote No.">
-            <Input value={q.quoteNo} onChange={(e) => update({ quoteNo: e.target.value })} />
+            <Input
+              value={value.quoteNo}
+              onChange={(e) => update({ quoteNo: e.target.value })}
+            />
           </Field>
           <Field label="Date">
-            <Input type="date" value={q.date} onChange={(e) => update({ date: e.target.value })} />
+            <Input
+              type="date"
+              value={value.date}
+              onChange={(e) => update({ date: e.target.value })}
+            />
           </Field>
           <Field label="Customer Name">
-            <Input value={q.customerName} onChange={(e) => update({ customerName: e.target.value })} />
+            <Input
+              value={value.customerName}
+              onChange={(e) => update({ customerName: e.target.value })}
+            />
           </Field>
           <Field label="Customer Email">
-            <Input value={q.customerEmail} onChange={(e) => update({ customerEmail: e.target.value })} />
+            <Input
+              value={value.customerEmail}
+              onChange={(e) => update({ customerEmail: e.target.value })}
+            />
           </Field>
           <Field label="Sales Executive">
-            <Input value={q.salesExecutive} onChange={(e) => update({ salesExecutive: e.target.value })} />
+            <Input
+              value={value.salesExecutive}
+              onChange={(e) => update({ salesExecutive: e.target.value })}
+            />
           </Field>
           <Field label="Sales Email">
-            <Input value={q.salesEmail} onChange={(e) => update({ salesEmail: e.target.value })} />
+            <Input
+              value={value.salesEmail}
+              onChange={(e) => update({ salesEmail: e.target.value })}
+            />
           </Field>
           <Field label="Validity">
-            <Input value={q.validity} onChange={(e) => update({ validity: e.target.value })} />
+            <Input
+              value={value.validity}
+              onChange={(e) => update({ validity: e.target.value })}
+            />
           </Field>
           <Field label="Status">
             <Select
-              value={q.status}
+              value={value.status}
               onValueChange={(v) => update({ status: v as QuotationStatus })}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {QUOTATION_STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
+                {QUOTATION_STATUSES.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {status}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -180,7 +228,7 @@ export function QuotationForm({
           <Field label="Product Photography Link (clickable in PDF)">
             <Input
               placeholder="https://drive.google.com/..."
-              value={q.productLink}
+              value={value.productLink}
               onChange={(e) => update({ productLink: e.target.value })}
             />
           </Field>
@@ -190,10 +238,26 @@ export function QuotationForm({
       <section>
         <h3 className="mb-3 font-display text-lg">4 View CAD Images</h3>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          <ImageField label="Front View" value={q.imageFront} onChange={(v) => update({ imageFront: v })} />
-          <ImageField label="Side View" value={q.imageSide} onChange={(v) => update({ imageSide: v })} />
-          <ImageField label="Top View" value={q.imageTop} onChange={(v) => update({ imageTop: v })} />
-          <ImageField label="Perspective" value={q.imagePerspective} onChange={(v) => update({ imagePerspective: v })} />
+          <ImageField
+            label="Front View"
+            value={value.imageFront}
+            onChange={(v) => update({ imageFront: v })}
+          />
+          <ImageField
+            label="Side View"
+            value={value.imageSide}
+            onChange={(v) => update({ imageSide: v })}
+          />
+          <ImageField
+            label="Top View"
+            value={value.imageTop}
+            onChange={(v) => update({ imageTop: v })}
+          />
+          <ImageField
+            label="Perspective"
+            value={value.imagePerspective}
+            onChange={(v) => update({ imagePerspective: v })}
+          />
         </div>
       </section>
 
@@ -215,8 +279,10 @@ export function QuotationForm({
           ] as const).map(([label, key]) => (
             <Field key={key} label={label}>
               <Input
-                value={q[key] as string}
-                onChange={(e) => update({ [key]: e.target.value } as Partial<Quotation>)}
+                value={value[key] as string}
+                onChange={(e) =>
+                  update({ [key]: e.target.value } as Partial<Quotation>)
+                }
               />
             </Field>
           ))}
@@ -231,41 +297,51 @@ export function QuotationForm({
           </Button>
         </div>
         <div className="space-y-2">
-          {q.diamonds.map((d) => (
-            <div key={d.id} className="grid grid-cols-12 items-center gap-2">
+          {value.diamonds.map((diamond) => (
+            <div key={diamond.id} className="grid grid-cols-12 items-center gap-2">
               <Input
                 className="col-span-3"
                 placeholder="Shape"
-                value={d.shape}
-                onChange={(e) => updateDiamond(d.id, { shape: e.target.value })}
+                value={diamond.shape}
+                onChange={(e) =>
+                  updateDiamond(diamond.id, { shape: e.target.value })
+                }
               />
               <Input
                 className="col-span-3"
                 placeholder="Size"
-                value={d.size}
-                onChange={(e) => updateDiamond(d.id, { size: e.target.value })}
+                value={diamond.size}
+                onChange={(e) =>
+                  updateDiamond(diamond.id, { size: e.target.value })
+                }
               />
               <Input
                 className="col-span-2"
                 placeholder="Qty"
                 type="number"
-                value={d.qty}
-                onChange={(e) => updateDiamond(d.id, { qty: Number(e.target.value) })}
+                value={diamond.qty}
+                onChange={(e) =>
+                  updateDiamond(diamond.id, { qty: Number(e.target.value) })
+                }
               />
               <Input
                 className="col-span-3"
                 placeholder="Total Weight (CT)"
                 type="number"
                 step="0.01"
-                value={d.totalWeight}
-                onChange={(e) => updateDiamond(d.id, { totalWeight: Number(e.target.value) })}
+                value={diamond.totalWeight}
+                onChange={(e) =>
+                  updateDiamond(diamond.id, {
+                    totalWeight: Number(e.target.value),
+                  })
+                }
               />
               <Button
                 type="button"
                 size="icon"
                 variant="ghost"
                 className="col-span-1"
-                onClick={() => removeDiamond(d.id)}
+                onClick={() => removeDiamond(diamond.id)}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -282,26 +358,30 @@ export function QuotationForm({
           </Button>
         </div>
         <div className="space-y-2">
-          {q.prices.map((p) => (
-            <div key={p.id} className="grid grid-cols-12 items-center gap-2">
+          {value.prices.map((price) => (
+            <div key={price.id} className="grid grid-cols-12 items-center gap-2">
               <Input
                 className="col-span-7"
                 placeholder="Description"
-                value={p.description}
-                onChange={(e) => updatePrice(p.id, { description: e.target.value })}
+                value={price.description}
+                onChange={(e) =>
+                  updatePrice(price.id, { description: e.target.value })
+                }
               />
               <Input
                 className="col-span-4"
                 placeholder="Amount"
-                value={p.amount}
-                onChange={(e) => updatePrice(p.id, { amount: e.target.value })}
+                value={price.amount}
+                onChange={(e) =>
+                  updatePrice(price.id, { amount: e.target.value })
+                }
               />
               <Button
                 type="button"
                 size="icon"
                 variant="ghost"
                 className="col-span-1"
-                onClick={() => removePrice(p.id)}
+                onClick={() => removePrice(price.id)}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -309,10 +389,16 @@ export function QuotationForm({
           ))}
           <Row>
             <Field label="Total Price">
-              <Input value={q.totalPrice} onChange={(e) => update({ totalPrice: e.target.value })} />
+              <Input
+                value={value.totalPrice}
+                onChange={(e) => update({ totalPrice: e.target.value })}
+              />
             </Field>
             <Field label="Currency">
-              <Input value={q.currency} onChange={(e) => update({ currency: e.target.value })} />
+              <Input
+                value={value.currency}
+                onChange={(e) => update({ currency: e.target.value })}
+              />
             </Field>
           </Row>
         </div>
@@ -323,13 +409,19 @@ export function QuotationForm({
         <Field label="Terms (one per line)">
           <Textarea
             rows={6}
-            value={q.terms.join("\n")}
-            onChange={(e) => update({ terms: e.target.value.split("\n").filter(Boolean) })}
+            value={value.terms.join("\n")}
+            onChange={(e) =>
+              update({ terms: e.target.value.split("\n").filter(Boolean) })
+            }
           />
         </Field>
         <div className="mt-3">
           <Field label="Internal Notes (optional, shown on PDF)">
-            <Textarea rows={3} value={q.notes} onChange={(e) => update({ notes: e.target.value })} />
+            <Textarea
+              rows={3}
+              value={value.notes}
+              onChange={(e) => update({ notes: e.target.value })}
+            />
           </Field>
         </div>
       </section>

@@ -9,6 +9,7 @@ import { exportElementToPDF } from "@/lib/pdf";
 import { toast } from "sonner";
 import { isAuthed } from "@/lib/auth";
 import { getClient } from "@/lib/clients";
+import { AppHeader } from "./AppHeader";
 
 export function QuotationEditor({ initial }: { initial: Quotation }) {
   const navigate = useNavigate();
@@ -44,37 +45,57 @@ export function QuotationEditor({ initial }: { initial: Quotation }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-20 border-b border-border bg-ink text-white">
-        <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-4">
+      <AppHeader
+        sticky
+        portalLabel="Quotation Builder"
+        containerClassName="py-3"
+        leftSlot={
+          <>
             <Link
               to={client ? "/clients/$id" : "/"}
               params={client ? { id: client.id } : undefined as never}
             >
-              <Button size="sm" variant="ghost" className="text-white/80 hover:bg-white/10 hover:text-white">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-primary/80 hover:bg-primary/8 hover:text-primary"
+              >
                 <ArrowLeft className="mr-1 h-4 w-4" />
                 {client ? client.name || "Client" : "Clients"}
               </Button>
             </Link>
-            <span className="font-display text-sm uppercase tracking-[0.3em] text-white/70">
+            <span className="font-display text-sm uppercase tracking-[0.3em] text-primary/70">
               {q.quoteNo}
             </span>
-            <span className="rounded-full bg-white/10 px-3 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/80">
+            <span className="rounded-full bg-primary/10 px-3 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary/80">
               {q.status}
             </span>
-          </div>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" className="border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white" onClick={save}>
+          </>
+        }
+        rightSlot={
+          <>
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-primary/20 bg-white/70 text-primary hover:bg-primary/8 hover:text-primary"
+              onClick={save}
+            >
               <Save className="mr-2 h-4 w-4" /> Save
             </Button>
-            <Button size="sm" className="gold-gradient text-white hover:opacity-90" onClick={download} disabled={busy}>
-              <Download className="mr-2 h-4 w-4" /> {busy ? "Generating..." : "Download PDF"}
+            <Button
+              size="sm"
+              className="gold-gradient text-white hover:opacity-90"
+              onClick={download}
+              disabled={busy}
+            >
+              <Download className="mr-2 h-4 w-4" />{" "}
+              {busy ? "Generating..." : "Download PDF"}
             </Button>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
 
-      <div className="mx-auto grid max-w-[1400px] gap-8 px-6 py-8 lg:grid-cols-[480px_1fr]">
+      <div className="app-shell-wide grid gap-8 py-8 lg:grid-cols-[480px_1fr]">
         <div className="rounded-xl border border-border bg-card p-6">
           <QuotationForm value={q} onChange={setQ} />
         </div>
