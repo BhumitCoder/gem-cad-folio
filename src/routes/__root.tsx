@@ -73,14 +73,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Starlink Jewels quotation portal" },
+      { name: "description", content: "Discover premium Lab Grown & Natural Diamond jewelry at Starlink Jewels. Shop certified engagement rings, necklaces & custom designs with worldwide" },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Starlink Jewels quotation portal" },
+      { property: "og:description", content: "Discover premium Lab Grown & Natural Diamond jewelry at Starlink Jewels. Shop certified engagement rings, necklaces & custom designs with worldwide" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Starlink Jewels quotation portal" },
+      { name: "twitter:description", content: "Discover premium Lab Grown & Natural Diamond jewelry at Starlink Jewels. Shop certified engagement rings, necklaces & custom designs with worldwide" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/JlG5PmaXajOv9AKw9PyqA2kwUyy1/social-images/social-1778586391164-starlink-logo-horizontal-DJzhPoqe_(1).webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/JlG5PmaXajOv9AKw9PyqA2kwUyy1/social-images/social-1778586391164-starlink-logo-horizontal-DJzhPoqe_(1).webp" },
     ],
     links: [
       {
