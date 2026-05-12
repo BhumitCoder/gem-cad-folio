@@ -8,6 +8,7 @@ import { upsert, type Quotation } from "@/lib/quotations";
 import { exportElementToPDF } from "@/lib/pdf";
 import { toast } from "sonner";
 import { isAuthed } from "@/lib/auth";
+import { getClient } from "@/lib/clients";
 
 export function QuotationEditor({ initial }: { initial: Quotation }) {
   const navigate = useNavigate();
@@ -39,25 +40,34 @@ export function QuotationEditor({ initial }: { initial: Quotation }) {
     }
   };
 
+  const client = q.clientId ? getClient(q.clientId) : undefined;
+
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-20 border-b border-border bg-[#0c0a06] text-white">
+      <header className="sticky top-0 z-20 border-b border-border bg-ink text-white">
         <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-3">
           <div className="flex items-center gap-4">
-            <Link to="/">
+            <Link
+              to={client ? "/clients/$id" : "/"}
+              params={client ? { id: client.id } : undefined as never}
+            >
               <Button size="sm" variant="ghost" className="text-white/80 hover:bg-white/10 hover:text-white">
-                <ArrowLeft className="mr-1 h-4 w-4" /> Back
+                <ArrowLeft className="mr-1 h-4 w-4" />
+                {client ? client.name || "Client" : "Clients"}
               </Button>
             </Link>
-            <span className="font-display text-sm uppercase tracking-[0.3em] text-gold">
+            <span className="font-display text-sm uppercase tracking-[0.3em] text-white/70">
               {q.quoteNo}
+            </span>
+            <span className="rounded-full bg-white/10 px-3 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/80">
+              {q.status}
             </span>
           </div>
           <div className="flex gap-2">
             <Button size="sm" variant="outline" className="border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white" onClick={save}>
               <Save className="mr-2 h-4 w-4" /> Save
             </Button>
-            <Button size="sm" className="gold-gradient text-[#0c0a06] hover:opacity-90" onClick={download} disabled={busy}>
+            <Button size="sm" className="gold-gradient text-white hover:opacity-90" onClick={download} disabled={busy}>
               <Download className="mr-2 h-4 w-4" /> {busy ? "Generating..." : "Download PDF"}
             </Button>
           </div>
