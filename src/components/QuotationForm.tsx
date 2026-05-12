@@ -1,9 +1,17 @@
 import { useRef, useState } from "react";
-import type { Quotation, DiamondRow, PriceRow } from "@/lib/quotations";
+import type { Quotation, DiamondRow, PriceRow, QuotationStatus } from "@/lib/quotations";
+import { QUOTATION_STATUSES } from "@/lib/quotations";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Trash2, Plus, Upload } from "lucide-react";
 
 function readFileAsDataURL(file: File): Promise<string> {
@@ -32,7 +40,7 @@ function ImageField({
       </Label>
       <div
         onClick={() => ref.current?.click()}
-        className="group relative aspect-square cursor-pointer overflow-hidden rounded-md border border-dashed border-border bg-muted/40 transition hover:border-gold"
+        className="group relative aspect-square cursor-pointer overflow-hidden rounded-md border border-dashed border-border bg-muted/40 transition hover:border-primary"
       >
         {value ? (
           <img src={value} alt={label} className="h-full w-full object-cover" />
@@ -150,7 +158,33 @@ export function QuotationForm({
           <Field label="Validity">
             <Input value={q.validity} onChange={(e) => update({ validity: e.target.value })} />
           </Field>
+          <Field label="Status">
+            <Select
+              value={q.status}
+              onValueChange={(v) => update({ status: v as QuotationStatus })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {QUOTATION_STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
         </Row>
+        <div className="mt-3">
+          <Field label="Product Photography Link (clickable in PDF)">
+            <Input
+              placeholder="https://drive.google.com/..."
+              value={q.productLink}
+              onChange={(e) => update({ productLink: e.target.value })}
+            />
+          </Field>
+        </div>
       </section>
 
       <section>

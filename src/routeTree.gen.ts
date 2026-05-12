@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as QuotationNewRouteImport } from './routes/quotation.new'
+import { Route as QuotationIdRouteImport } from './routes/quotation.$id'
+import { Route as ClientsIdRouteImport } from './routes/clients.$id'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -28,34 +30,63 @@ const QuotationNewRoute = QuotationNewRouteImport.update({
   path: '/quotation/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QuotationIdRoute = QuotationIdRouteImport.update({
+  id: '/quotation/$id',
+  path: '/quotation/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientsIdRoute = ClientsIdRouteImport.update({
+  id: '/clients/$id',
+  path: '/clients/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/clients/$id': typeof ClientsIdRoute
+  '/quotation/$id': typeof QuotationIdRoute
   '/quotation/new': typeof QuotationNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/clients/$id': typeof ClientsIdRoute
+  '/quotation/$id': typeof QuotationIdRoute
   '/quotation/new': typeof QuotationNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/clients/$id': typeof ClientsIdRoute
+  '/quotation/$id': typeof QuotationIdRoute
   '/quotation/new': typeof QuotationNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/quotation/new'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/clients/$id'
+    | '/quotation/$id'
+    | '/quotation/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/quotation/new'
-  id: '__root__' | '/' | '/login' | '/quotation/new'
+  to: '/' | '/login' | '/clients/$id' | '/quotation/$id' | '/quotation/new'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/clients/$id'
+    | '/quotation/$id'
+    | '/quotation/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  ClientsIdRoute: typeof ClientsIdRoute
+  QuotationIdRoute: typeof QuotationIdRoute
   QuotationNewRoute: typeof QuotationNewRoute
 }
 
@@ -82,12 +113,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuotationNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/quotation/$id': {
+      id: '/quotation/$id'
+      path: '/quotation/$id'
+      fullPath: '/quotation/$id'
+      preLoaderRoute: typeof QuotationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clients/$id': {
+      id: '/clients/$id'
+      path: '/clients/$id'
+      fullPath: '/clients/$id'
+      preLoaderRoute: typeof ClientsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  ClientsIdRoute: ClientsIdRoute,
+  QuotationIdRoute: QuotationIdRoute,
   QuotationNewRoute: QuotationNewRoute,
 }
 export const routeTree = rootRouteImport
