@@ -16,6 +16,10 @@ const cardStyle: CSSProperties = {
   boxShadow: "0 24px 60px rgba(23, 58, 134, 0.12)",
 };
 
+function hasText(value: string | null | undefined) {
+  return Boolean(value?.trim());
+}
+
 function ImageBox({ src, label }: { src: string; label: string }) {
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -84,7 +88,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
         style={{
           height: 1,
           flex: 1,
-          background: `linear-gradient(to right, transparent, ${BRAND})`,
+          backgroundColor: BRAND_BORDER,
         }}
       />
       <h3
@@ -104,7 +108,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
         style={{
           height: 1,
           flex: 1,
-          background: `linear-gradient(to left, transparent, ${BRAND})`,
+          backgroundColor: BRAND_BORDER,
         }}
       />
     </div>
@@ -118,6 +122,56 @@ export function QuotationSheet({
   q: Quotation;
   innerRef?: React.Ref<HTMLDivElement>;
 }) {
+  const customerRows = [
+    ["Customer Name", q.customerName],
+    ["Email", q.customerEmail],
+    ["Sales Executive", q.salesExecutive],
+    ["Sales Email", q.salesEmail],
+  ].filter(([, value]) => hasText(value));
+
+  const imageRows = [
+    { src: q.imageFront, label: "Front View" },
+    { src: q.imageSide, label: "Side View" },
+    { src: q.imageTop, label: "Top View" },
+    { src: q.imagePerspective, label: "Perspective" },
+  ].filter((item) => hasText(item.src));
+
+  const specRows = [
+    ["Jewelry Type", q.jewelryType],
+    ["Metal", q.metal],
+    ["Gross Weight", q.grossWeight],
+    ["Net Gold Weight", q.netGoldWeight],
+    ["Center Stone", q.centerStone],
+    ["Side Diamonds", q.sideDiamonds],
+    ["Total Diamond Weight", q.totalDiamondWeight],
+    ["Diamond Quality", q.diamondQuality],
+    ["Ring Size", q.ringSize],
+    ["Setting Type", q.settingType],
+    ["Polish", q.polish],
+  ].filter(([, value]) => hasText(value));
+
+  const diamondRows = q.diamonds.filter(
+    (diamond) =>
+      hasText(diamond.shape) ||
+      hasText(diamond.size) ||
+      diamond.qty > 0 ||
+      diamond.totalWeight > 0,
+  );
+
+  const priceRows = q.prices.filter(
+    (price) => hasText(price.description) && hasText(price.amount),
+  );
+
+  const termRows = q.terms.filter((term) => hasText(term));
+
+  const showQuoteNo = hasText(q.quoteNo);
+  const showDate = hasText(q.date);
+  const showValidity = hasText(q.validity);
+  const showStatus = hasText(q.status);
+  const showTotalPrice = hasText(q.totalPrice);
+  const showCurrency = hasText(q.currency);
+  const showSalesEmail = hasText(q.salesEmail);
+
   return (
     <div
       ref={innerRef}
@@ -133,238 +187,283 @@ export function QuotationSheet({
         style={{
           position: "relative",
           overflow: "hidden",
-          padding: "30px 34px 22px",
-          background:
-            "linear-gradient(180deg, #fbfdff 0%, #f2f7ff 52%, #edf4ff 100%)",
+          padding: "30px 34px 20px",
+          backgroundColor: "#f7faff",
           borderBottom: `1px solid ${BRAND_BORDER}`,
         }}
       >
         <div
           style={{
             position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(circle at top left, rgba(47,95,183,0.14) 0%, transparent 34%), radial-gradient(circle at 82% 18%, rgba(47,95,183,0.12) 0%, transparent 28%)",
+            left: 34,
+            right: 34,
+            top: 18,
+            height: 4,
+            borderRadius: 9999,
+            backgroundColor: BRAND,
           }}
         />
         <div
           style={{
             position: "relative",
-            display: "flex",
-            alignItems: "stretch",
-            justifyContent: "space-between",
-            gap: 26,
+            borderRadius: 28,
+            border: `1px solid rgba(47,95,183,0.1)`,
+            background: "rgba(255,255,255,0.92)",
+            boxShadow: "0 18px 40px rgba(24, 54, 124, 0.08)",
+            overflow: "hidden",
           }}
         >
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 20,
-              minWidth: 0,
-              flex: 1,
-              borderRadius: 24,
-              border: `1px solid rgba(47,95,183,0.12)`,
-              background:
-                "linear-gradient(135deg, rgba(255,255,255,0.98), rgba(240,246,255,0.94))",
-              padding: "24px 24px 22px",
+              position: "absolute",
+              inset: "0 0 0 auto",
+              width: 234,
+              backgroundColor: BRAND_DEEP,
             }}
-          >
-            <img src={LOGO} alt="Starlink Jewels" style={{ height: 66, width: "auto" }} />
-            <div
-              style={{
-                width: 1,
-                height: 62,
-                backgroundColor: BRAND_BORDER,
-              }}
-            />
-            <div>
-              <div
-                style={{
-                  color: BRAND_DEEP,
-                  fontFamily: '"Cormorant Garamond", serif',
-                  fontSize: 18,
-                  fontWeight: 700,
-                  letterSpacing: "0.3em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Quotation
-              </div>
-              <div
-                style={{
-                  marginTop: 6,
-                  color: SUBTEXT,
-                  fontSize: 11,
-                  letterSpacing: "0.28em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Custom Jewelry / Lab Diamonds
-              </div>
-              <div
-                style={{
-                  marginTop: 14,
-                  color: BRAND,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  letterSpacing: "0.16em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Crafted proposal for premium jewelry presentation
-              </div>
-            </div>
-          </div>
-
+          />
           <div
             style={{
-              minWidth: 240,
-              borderRadius: 28,
-              background: `linear-gradient(135deg, ${BRAND_DEEP}, ${BRAND})`,
-              padding: "22px 22px 20px",
-              textAlign: "right",
-              boxShadow: "0 18px 36px rgba(23, 58, 134, 0.18)",
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 1fr) 234px",
+              alignItems: "stretch",
             }}
           >
             <div
               style={{
-                color: "rgba(255,255,255,0.68)",
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: "0.26em",
-                textTransform: "uppercase",
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                minWidth: 0,
+                padding: "30px 28px",
               }}
             >
-              Quote Reference
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 18,
+                  minWidth: 0,
+                }}
+              >
+                <img
+                  src={LOGO}
+                  alt="Starlink Jewels"
+                  style={{ height: 72, width: "auto", flexShrink: 0 }}
+                />
+                <div
+                  style={{
+                    width: 1,
+                    height: 64,
+                    backgroundColor: BRAND_BORDER,
+                    flexShrink: 0,
+                  }}
+                />
+                <div style={{ minWidth: 0, maxWidth: 280 }}>
+                  <div
+                    style={{
+                      color: BRAND,
+                      fontSize: 10,
+                      fontWeight: 700,
+                      letterSpacing: "0.28em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Starlink Jewels
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 8,
+                      color: BRAND_DEEP,
+                      fontFamily: '"Cormorant Garamond", serif',
+                      fontSize: 31,
+                      fontWeight: 700,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      lineHeight: 1.02,
+                    }}
+                  >
+                    Quotation
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 8,
+                      color: SUBTEXT,
+                      fontSize: 11,
+                      letterSpacing: "0.22em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Custom Jewelry Proposal
+                  </div>
+                </div>
+              </div>
             </div>
             <div
               style={{
-                marginTop: 10,
+                position: "relative",
+                minWidth: 0,
+                padding: "28px 24px 24px",
                 color: "#ffffff",
-                fontFamily: '"Cormorant Garamond", serif',
-                fontSize: 32,
-                fontWeight: 700,
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
               }}
             >
-              {q.quoteNo}
-            </div>
-            <div
-              style={{
-                marginTop: 10,
-                color: "rgba(255,255,255,0.78)",
-                fontSize: 11,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-              }}
-            >
-              {q.date} / {q.validity}
-            </div>
-            <div
-              style={{
-                marginTop: 18,
-                display: "inline-block",
-                borderRadius: 9999,
-                backgroundColor: "rgba(255,255,255,0.14)",
-                padding: "7px 16px",
-                color: "#ffffff",
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: "0.24em",
-                textTransform: "uppercase",
-              }}
-            >
-              Status / {q.status}
+              {showQuoteNo ? (
+                <div
+                  style={{
+                    color: "rgba(255,255,255,0.72)",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    letterSpacing: "0.24em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Quote No.
+                </div>
+              ) : null}
+              {showQuoteNo ? (
+                <div
+                  style={{
+                    marginTop: 10,
+                    color: "#ffffff",
+                    fontFamily: '"Cormorant Garamond", serif',
+                    fontSize: 28,
+                    fontWeight: 700,
+                    letterSpacing: "0.08em",
+                    lineHeight: 1.08,
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {q.quoteNo}
+                </div>
+              ) : null}
+              {showDate ? (
+                <div
+                  style={{
+                    fontSize: 10,
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.78)",
+                    marginTop: showQuoteNo ? 12 : 0,
+                  }}
+                >
+                  {q.date}
+                </div>
+              ) : null}
+              {showValidity || showStatus ? (
+                <div
+                  style={{
+                    marginTop: 20,
+                    paddingTop: 18,
+                    borderTop: "1px solid rgba(255,255,255,0.18)",
+                  }}
+                >
+                  {showValidity ? (
+                    <div
+                      style={{
+                        color: "rgba(255,255,255,0.68)",
+                        fontSize: 10,
+                        fontWeight: 700,
+                        letterSpacing: "0.22em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Validity
+                    </div>
+                  ) : null}
+                  <div
+                    style={{
+                      marginTop: showValidity ? 6 : 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 12,
+                    }}
+                  >
+                    {showValidity ? (
+                      <span
+                        style={{
+                          color: "#ffffff",
+                          fontSize: 13,
+                          fontWeight: 600,
+                        }}
+                      >
+                        {q.validity}
+                      </span>
+                    ) : <span />}
+                    {showStatus ? (
+                      <span
+                        style={{
+                          borderRadius: 9999,
+                          backgroundColor: "rgba(255,255,255,0.14)",
+                          padding: "7px 12px",
+                          color: "#ffffff",
+                          fontSize: 10,
+                          fontWeight: 700,
+                          letterSpacing: "0.2em",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {q.status}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-          borderBottom: `1px solid ${BRAND_BORDER}`,
-          backgroundColor: BRAND_SOFT,
-          fontSize: 11,
-        }}
-      >
-        {[
-          ["Quote No.", q.quoteNo],
-          ["Date", q.date],
-          ["Valid", q.validity],
-          ["Sales", q.salesExecutive],
-        ].map(([label, value], index) => (
-          <div
-            key={label}
-            style={{
-              padding: "14px 24px",
-              borderRight: index === 3 ? "none" : `1px solid ${BRAND_BORDER}`,
-            }}
-          >
-            <div
-              style={{
-                color: BRAND,
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "0.2em",
-              }}
-            >
-              {label}
-            </div>
-            <div style={{ marginTop: 6, color: TEXT, fontSize: 13 }}>{value}</div>
-          </div>
-        ))}
       </div>
 
       <div style={{ padding: "24px 44px" }}>
-        <SectionTitle>Customer Details</SectionTitle>
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            fontSize: 12,
-          }}
-        >
-          <tbody>
-            {[
-              ["Customer Name", q.customerName || "-"],
-              ["Email", q.customerEmail || "-"],
-              ["Sales Executive", q.salesExecutive],
-              ["Sales Email", q.salesEmail],
-            ].map(([label, value]) => (
-              <tr key={label} style={{ borderBottom: `1px solid ${BRAND_BORDER}` }}>
-                <td
-                  style={{
-                    width: "33.333%",
-                    padding: "10px 16px 10px 0",
-                    color: BRAND,
-                    fontWeight: 700,
-                  }}
-                >
-                  {label}
-                </td>
-                <td style={{ padding: "10px 0", color: TEXT }}>{value}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {customerRows.length ? (
+          <>
+            <SectionTitle>Customer Details</SectionTitle>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontSize: 12,
+              }}
+            >
+              <tbody>
+                {customerRows.map(([label, value]) => (
+                  <tr key={label} style={{ borderBottom: `1px solid ${BRAND_BORDER}` }}>
+                    <td
+                      style={{
+                        width: "33.333%",
+                        padding: "10px 16px 10px 0",
+                        color: BRAND,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {label}
+                    </td>
+                    <td style={{ padding: "10px 0", color: TEXT }}>{value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        ) : null}
 
-        <SectionTitle>Product Preview / 4 View CAD</SectionTitle>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-            gap: 16,
-          }}
-        >
-          <ImageBox src={q.imageFront} label="Front View" />
-          <ImageBox src={q.imageSide} label="Side View" />
-          <ImageBox src={q.imageTop} label="Top View" />
-          <ImageBox src={q.imagePerspective} label="Perspective" />
-        </div>
+        {imageRows.length ? (
+          <>
+            <SectionTitle>Product Preview / 4 View CAD</SectionTitle>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: `repeat(${Math.min(imageRows.length, 4)}, minmax(0, 1fr))`,
+                gap: 16,
+              }}
+            >
+              {imageRows.map((image) => (
+                <ImageBox key={image.label} src={image.src} label={image.label} />
+              ))}
+            </div>
+          </>
+        ) : null}
 
         {q.productLink ? (
           <div
@@ -403,7 +502,7 @@ export function QuotationSheet({
               rel="noreferrer"
               style={{
                 borderRadius: 10,
-                background: `linear-gradient(135deg, ${BRAND}, ${BRAND_DEEP})`,
+                backgroundColor: BRAND,
                 padding: "10px 16px",
                 color: "#ffffff",
                 fontSize: 11,
@@ -418,176 +517,182 @@ export function QuotationSheet({
           </div>
         ) : null}
 
-        <SectionTitle>Jewelry Specifications</SectionTitle>
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            fontSize: 12,
-          }}
-        >
-          <tbody>
-            {[
-              ["Jewelry Type", q.jewelryType],
-              ["Metal", q.metal],
-              ["Gross Weight", q.grossWeight],
-              ["Net Gold Weight", q.netGoldWeight],
-              ["Center Stone", q.centerStone],
-              ["Side Diamonds", q.sideDiamonds],
-              ["Total Diamond Weight", q.totalDiamondWeight],
-              ["Diamond Quality", q.diamondQuality],
-              ["Ring Size", q.ringSize],
-              ["Setting Type", q.settingType],
-              ["Polish", q.polish],
-            ].map(([label, value], index) => (
-              <tr
-                key={label}
-                style={{
-                  backgroundColor: index % 2 ? BRAND_SOFT : "transparent",
-                }}
-              >
-                <td
-                  style={{
-                    width: "33.333%",
-                    padding: "10px 12px",
-                    color: BRAND,
-                    fontWeight: 700,
-                  }}
-                >
-                  {label}
-                </td>
-                <td style={{ padding: "10px 12px", color: TEXT }}>{value}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {specRows.length ? (
+          <>
+            <SectionTitle>Jewelry Specifications</SectionTitle>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontSize: 12,
+              }}
+            >
+              <tbody>
+                {specRows.map(([label, value], index) => (
+                  <tr
+                    key={label}
+                    style={{
+                      backgroundColor: index % 2 ? BRAND_SOFT : "transparent",
+                    }}
+                  >
+                    <td
+                      style={{
+                        width: "33.333%",
+                        padding: "10px 12px",
+                        color: BRAND,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {label}
+                    </td>
+                    <td style={{ padding: "10px 12px", color: TEXT }}>{value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        ) : null}
 
-        <SectionTitle>Diamond Breakdown</SectionTitle>
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            fontSize: 12,
-          }}
-        >
-          <thead>
-            <tr style={{ backgroundColor: BRAND_DEEP, color: "#ffffff" }}>
-              {["Shape", "Size", "Qty", "Total Weight"].map((label, index) => (
-                <th
-                  key={label}
-                  style={{
-                    padding: "10px 12px",
-                    textAlign: index < 2 ? "left" : "right",
-                    fontWeight: 700,
-                    letterSpacing: "0.15em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {label}
-                </th>
+        {diamondRows.length ? (
+          <>
+            <SectionTitle>Diamond Breakdown</SectionTitle>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontSize: 12,
+              }}
+            >
+              <thead>
+                <tr style={{ backgroundColor: BRAND_DEEP, color: "#ffffff" }}>
+                  {["Shape", "Size", "Qty", "Total Weight"].map((label, index) => (
+                    <th
+                      key={label}
+                      style={{
+                        padding: "10px 12px",
+                        textAlign: index < 2 ? "left" : "right",
+                        fontWeight: 700,
+                        letterSpacing: "0.15em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {label}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {diamondRows.map((diamond, index) => (
+                  <tr
+                    key={diamond.id}
+                    style={{
+                      backgroundColor: index % 2 ? BRAND_SOFT : "transparent",
+                    }}
+                  >
+                    <td style={{ padding: "10px 12px" }}>{diamond.shape}</td>
+                    <td style={{ padding: "10px 12px" }}>{diamond.size}</td>
+                    <td style={{ padding: "10px 12px", textAlign: "right" }}>
+                      {diamond.qty}
+                    </td>
+                    <td style={{ padding: "10px 12px", textAlign: "right" }}>
+                      {diamond.totalWeight} CT
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        ) : null}
+
+        {priceRows.length || showTotalPrice ? (
+          <>
+            <SectionTitle>Price Breakdown</SectionTitle>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontSize: 12,
+              }}
+            >
+              <tbody>
+                {priceRows.map((price, index) => (
+                  <tr
+                    key={price.id}
+                    style={{
+                      backgroundColor: index % 2 ? BRAND_SOFT : "transparent",
+                    }}
+                  >
+                    <td style={{ padding: "10px 12px", color: TEXT }}>
+                      {price.description}
+                    </td>
+                    <td
+                      style={{
+                        padding: "10px 12px",
+                        textAlign: "right",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {price.amount}
+                    </td>
+                  </tr>
+                ))}
+                {showTotalPrice ? (
+                  <tr style={{ backgroundColor: BRAND_DEEP, color: "#ffffff" }}>
+                    <td
+                      style={{
+                        padding: "14px 12px",
+                        fontFamily: '"Cormorant Garamond", serif',
+                        fontSize: 15,
+                        fontWeight: 700,
+                        letterSpacing: "0.25em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Total Price
+                    </td>
+                    <td
+                      style={{
+                        padding: "14px 12px",
+                        textAlign: "right",
+                        fontFamily: '"Cormorant Garamond", serif',
+                        fontSize: 18,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {q.totalPrice} {showCurrency ? q.currency : ""}
+                    </td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
+          </>
+        ) : null}
+
+        {termRows.length ? (
+          <>
+            <SectionTitle>Terms & Conditions</SectionTitle>
+            <ul
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                columnGap: 24,
+                rowGap: 6,
+                color: TEXT,
+                fontSize: 11.5,
+                listStyle: "none",
+                padding: 0,
+                margin: 0,
+              }}
+            >
+              {termRows.map((term, index) => (
+                <li key={index} style={{ display: "flex", gap: 8 }}>
+                  <span style={{ color: BRAND }}>*</span>
+                  <span>{term}</span>
+                </li>
               ))}
-            </tr>
-          </thead>
-          <tbody>
-            {q.diamonds.map((diamond, index) => (
-              <tr
-                key={diamond.id}
-                style={{
-                  backgroundColor: index % 2 ? BRAND_SOFT : "transparent",
-                }}
-              >
-                <td style={{ padding: "10px 12px" }}>{diamond.shape}</td>
-                <td style={{ padding: "10px 12px" }}>{diamond.size}</td>
-                <td style={{ padding: "10px 12px", textAlign: "right" }}>
-                  {diamond.qty}
-                </td>
-                <td style={{ padding: "10px 12px", textAlign: "right" }}>
-                  {diamond.totalWeight} CT
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        <SectionTitle>Price Breakdown</SectionTitle>
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            fontSize: 12,
-          }}
-        >
-          <tbody>
-            {q.prices.map((price, index) => (
-              <tr
-                key={price.id}
-                style={{
-                  backgroundColor: index % 2 ? BRAND_SOFT : "transparent",
-                }}
-              >
-                <td style={{ padding: "10px 12px", color: TEXT }}>
-                  {price.description}
-                </td>
-                <td
-                  style={{
-                    padding: "10px 12px",
-                    textAlign: "right",
-                    fontWeight: 600,
-                  }}
-                >
-                  {price.amount}
-                </td>
-              </tr>
-            ))}
-            <tr style={{ backgroundColor: BRAND_DEEP, color: "#ffffff" }}>
-              <td
-                style={{
-                  padding: "14px 12px",
-                  fontFamily: '"Cormorant Garamond", serif',
-                  fontSize: 15,
-                  fontWeight: 700,
-                  letterSpacing: "0.25em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Total Price
-              </td>
-              <td
-                style={{
-                  padding: "14px 12px",
-                  textAlign: "right",
-                  fontFamily: '"Cormorant Garamond", serif',
-                  fontSize: 18,
-                  fontWeight: 700,
-                }}
-              >
-                {q.totalPrice} {q.currency}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <SectionTitle>Terms & Conditions</SectionTitle>
-        <ul
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-            columnGap: 24,
-            rowGap: 6,
-            color: TEXT,
-            fontSize: 11.5,
-            listStyle: "none",
-            padding: 0,
-            margin: 0,
-          }}
-        >
-          {q.terms.map((term, index) => (
-            <li key={index} style={{ display: "flex", gap: 8 }}>
-              <span style={{ color: BRAND }}>*</span>
-              <span>{term}</span>
-            </li>
-          ))}
-        </ul>
+            </ul>
+          </>
+        ) : null}
 
         {q.notes ? (
           <>
@@ -609,7 +714,7 @@ export function QuotationSheet({
         style={{
           marginTop: 16,
           padding: "24px 44px",
-          background: `linear-gradient(135deg, ${BRAND_DEEP}, ${BRAND})`,
+          backgroundColor: BRAND_DEEP,
           color: "#ffffff",
         }}
       >
@@ -653,7 +758,7 @@ export function QuotationSheet({
           >
             <div>starlinkjewels.com</div>
             <div>@starlinkjewels</div>
-            <div>{q.salesEmail}</div>
+            {showSalesEmail ? <div>{q.salesEmail}</div> : null}
           </div>
         </div>
         <div

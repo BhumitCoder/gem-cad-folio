@@ -20,6 +20,20 @@ function waitForImages(root: ParentNode) {
   );
 }
 
+function prepareCloneForPrint(root: HTMLElement) {
+  root.style.boxShadow = "none";
+  root.style.margin = "0";
+
+  Array.from(root.querySelectorAll<HTMLElement>("*")).forEach((node) => {
+    const { style } = node;
+
+    if (style.boxShadow) style.boxShadow = "none";
+    if (style.textShadow) style.textShadow = "none";
+    if (style.filter) style.filter = "none";
+    if (style.backdropFilter) style.backdropFilter = "none";
+  });
+}
+
 export async function exportElementToPDF(el: HTMLElement, filename: string) {
   const iframe = document.createElement("iframe");
 
@@ -65,6 +79,7 @@ export async function exportElementToPDF(el: HTMLElement, filename: string) {
     doc.close();
 
     const clone = el.cloneNode(true) as HTMLElement;
+    prepareCloneForPrint(clone);
     Array.from(clone.querySelectorAll("img")).forEach((img) => {
       const rawSrc = img.getAttribute("src");
       if (rawSrc?.startsWith("/")) {
@@ -79,16 +94,20 @@ export async function exportElementToPDF(el: HTMLElement, filename: string) {
     }
     await waitForImages(doc);
 
+    const width = Math.ceil(clone.scrollWidth);
+    const height = Math.ceil(clone.scrollHeight);
     const canvas = await html2canvas(clone, {
       backgroundColor: "#ffffff",
       logging: false,
-      scale: 2,
+      scale: 4,
       useCORS: true,
-      windowWidth: clone.scrollWidth,
-      windowHeight: clone.scrollHeight,
+      width,
+      height,
+      windowWidth: width,
+      windowHeight: height,
     });
 
-    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF({
       unit: "mm",
       format: "a4",
@@ -102,13 +121,13 @@ export async function exportElementToPDF(el: HTMLElement, filename: string) {
     let heightLeft = imgHeight;
     let position = 0;
 
-    pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
     heightLeft -= pageHeight;
 
     while (heightLeft > 0) {
       position -= pageHeight;
       pdf.addPage();
-      pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
     }
 

@@ -23,18 +23,18 @@ export function AppHeader({
   return (
     <header
       className={cn(
-        "brand-header border-b border-primary/10 text-primary shadow-sm",
+        "brand-header border-b border-primary/10 text-primary shadow-[0_8px_30px_rgba(47,95,183,0.08)]",
         sticky && "sticky top-0 z-20",
         className,
       )}
     >
       <div
         className={cn(
-          "app-shell flex flex-wrap items-center justify-between gap-4 py-4",
+          "app-shell flex flex-wrap items-center justify-between gap-4 py-3.5",
           containerClassName,
         )}
       >
-        <div className="flex min-w-0 flex-wrap items-center gap-3 sm:gap-4">
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
           {leftSlot}
           <Link
             to="/"
@@ -43,16 +43,18 @@ export function AppHeader({
             <img
               src="/starlink-jewels-logo.png"
               alt="Starlink Jewels"
-              className="h-10 w-auto sm:h-11"
+              className="h-9 w-auto sm:h-10"
             />
           </Link>
           {portalLabel ? (
-            <>
-              <div className="hidden h-7 w-px bg-primary/12 md:block" />
-              <span className="hidden font-display text-sm uppercase tracking-[0.28em] text-primary/70 md:block">
+            <div className="hidden min-w-0 border-l border-primary/12 pl-3 md:block">
+              <div className="text-[10px] font-medium uppercase tracking-[0.24em] text-primary/45">
+                Starlink Jewels
+              </div>
+              <div className="truncate font-display text-lg leading-none text-primary/82">
                 {portalLabel}
-              </span>
-            </>
+              </div>
+            </div>
           ) : null}
         </div>
 

@@ -50,30 +50,30 @@ export function QuotationEditor({ initial }: { initial: Quotation }) {
         portalLabel="Quotation Builder"
         containerClassName="py-3"
         leftSlot={
-          <>
-            <Link
-              to={client ? "/clients/$id" : "/"}
-              params={client ? { id: client.id } : undefined as never}
+          <Link
+            to={client ? "/clients/$id" : "/"}
+            params={client ? { id: client.id } : undefined as never}
+          >
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-primary/80 hover:bg-primary/8 hover:text-primary"
             >
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-primary/80 hover:bg-primary/8 hover:text-primary"
-              >
-                <ArrowLeft className="mr-1 h-4 w-4" />
-                {client ? client.name || "Client" : "Clients"}
-              </Button>
-            </Link>
-            <span className="font-display text-sm uppercase tracking-[0.3em] text-primary/70">
-              {q.quoteNo}
-            </span>
-            <span className="rounded-full bg-primary/10 px-3 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary/80">
-              {q.status}
-            </span>
-          </>
+              <ArrowLeft className="mr-1 h-4 w-4" />
+              {client ? client.name || "Client" : "Clients"}
+            </Button>
+          </Link>
         }
         rightSlot={
           <>
+            <div className="hidden items-center gap-2 md:flex">
+              <span className="font-display text-base text-primary/78">
+                {q.quoteNo}
+              </span>
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary/80">
+                {q.status}
+              </span>
+            </div>
             <Button
               size="sm"
               variant="outline"
@@ -104,7 +104,7 @@ export function QuotationEditor({ initial }: { initial: Quotation }) {
             <div className="mb-3 text-xs uppercase tracking-[0.25em] text-muted-foreground">
               Live Preview
             </div>
-            <div className="origin-top-left scale-[0.85] xl:scale-100">
+            <div className="origin-top-left scale-[0.82] 2xl:scale-[0.92]">
               <QuotationSheet q={q} innerRef={sheetRef} />
             </div>
           </div>
