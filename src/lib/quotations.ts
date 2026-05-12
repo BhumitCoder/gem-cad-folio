@@ -12,15 +12,33 @@ export interface PriceRow {
   amount: string; // free-form so "Included" works
 }
 
+export type QuotationStatus =
+  | "Draft"
+  | "Sent"
+  | "Needs Changes"
+  | "Approved"
+  | "Completed";
+
+export const QUOTATION_STATUSES: QuotationStatus[] = [
+  "Draft",
+  "Sent",
+  "Needs Changes",
+  "Approved",
+  "Completed",
+];
+
 export interface Quotation {
   id: string;
+  clientId: string;
   quoteNo: string;
   date: string;
   validity: string;
+  status: QuotationStatus;
   customerName: string;
   customerEmail: string;
   salesExecutive: string;
   salesEmail: string;
+  productLink: string;
   // images (data URLs)
   imageFront: string;
   imageSide: string;
@@ -95,16 +113,27 @@ export function nextQuoteNo(): string {
   return `SJ-${year}-${max + 1}`;
 }
 
-export function blankQuotation(): Quotation {
+export function listByClient(clientId: string): Quotation[] {
+  return loadAll().filter((q) => q.clientId === clientId);
+}
+
+export function blankQuotation(client?: {
+  id: string;
+  name: string;
+  email: string;
+}): Quotation {
   return {
     id: crypto.randomUUID(),
+    clientId: client?.id ?? "",
     quoteNo: nextQuoteNo(),
     date: new Date().toISOString().slice(0, 10),
     validity: "7 Days",
-    customerName: "",
-    customerEmail: "",
+    status: "Draft",
+    customerName: client?.name ?? "",
+    customerEmail: client?.email ?? "",
     salesExecutive: "Hardik Vasoya",
     salesEmail: "info@starlinkjewels.com",
+    productLink: "",
     imageFront: "",
     imageSide: "",
     imageTop: "",
