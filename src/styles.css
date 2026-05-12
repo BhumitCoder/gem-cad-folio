@@ -70,28 +70,28 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(0.985 0.003 80);
-  --foreground: oklch(0.16 0.01 80);
-  --ink: oklch(0.12 0.005 80);
+  --background: oklch(0.985 0.005 250);
+  --foreground: oklch(0.16 0.03 260);
+  --ink: oklch(0.18 0.06 265);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.16 0.01 80);
+  --card-foreground: oklch(0.16 0.03 260);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.16 0.01 80);
-  --primary: oklch(0.16 0.005 80);
-  --primary-foreground: oklch(0.97 0.02 85);
-  --secondary: oklch(0.95 0.012 85);
-  --secondary-foreground: oklch(0.16 0.005 80);
-  --muted: oklch(0.95 0.008 85);
-  --muted-foreground: oklch(0.45 0.015 80);
-  --accent: oklch(0.78 0.13 80);
-  --accent-foreground: oklch(0.16 0.005 80);
-  --gold: oklch(0.74 0.13 78);
-  --gold-foreground: oklch(0.14 0.005 80);
+  --popover-foreground: oklch(0.16 0.03 260);
+  --primary: oklch(0.42 0.16 265);
+  --primary-foreground: oklch(0.99 0.005 250);
+  --secondary: oklch(0.95 0.02 255);
+  --secondary-foreground: oklch(0.18 0.06 265);
+  --muted: oklch(0.95 0.015 255);
+  --muted-foreground: oklch(0.46 0.03 260);
+  --accent: oklch(0.55 0.17 262);
+  --accent-foreground: oklch(0.99 0.005 250);
+  --gold: oklch(0.45 0.17 264);
+  --gold-foreground: oklch(0.99 0.005 250);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.88 0.01 80);
-  --input: oklch(0.9 0.008 80);
-  --ring: oklch(0.74 0.13 78);
+  --border: oklch(0.9 0.015 255);
+  --input: oklch(0.92 0.012 255);
+  --ring: oklch(0.55 0.17 262);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -165,10 +165,10 @@
   .bg-gold { background-color: var(--gold); }
   .border-gold { border-color: var(--gold); }
   .gold-gradient {
-    background: linear-gradient(135deg, oklch(0.82 0.14 82) 0%, oklch(0.66 0.13 70) 100%);
+    background: linear-gradient(135deg, oklch(0.55 0.18 262) 0%, oklch(0.38 0.17 268) 100%);
   }
   .gold-text-gradient {
-    background: linear-gradient(135deg, oklch(0.78 0.14 82) 0%, oklch(0.55 0.12 65) 100%);
+    background: linear-gradient(135deg, oklch(0.55 0.18 262) 0%, oklch(0.35 0.17 270) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
