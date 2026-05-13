@@ -183,237 +183,161 @@ export function QuotationSheet({
         fontFamily: "Poppins, sans-serif",
       }}
     >
-      <div
-        style={{
-          position: "relative",
-          overflow: "hidden",
-          padding: "30px 34px 20px",
-          backgroundColor: "#f7faff",
-          borderBottom: `1px solid ${BRAND_BORDER}`,
-        }}
-      >
-        <div
+      <div style={{ borderBottom: `1px solid ${BRAND_BORDER}` }}>
+        <div style={{ height: 6, backgroundColor: BRAND_DEEP }} />
+        <table
           style={{
-            position: "absolute",
-            left: 34,
-            right: 34,
-            top: 18,
-            height: 4,
-            borderRadius: 9999,
-            backgroundColor: BRAND,
-          }}
-        />
-        <div
-          style={{
-            position: "relative",
-            borderRadius: 28,
-            border: `1px solid rgba(47,95,183,0.1)`,
-            background: "rgba(255,255,255,0.92)",
-            boxShadow: "0 18px 40px rgba(24, 54, 124, 0.08)",
-            overflow: "hidden",
+            width: "100%",
+            borderCollapse: "collapse",
+            tableLayout: "fixed",
+            backgroundColor: "#ffffff",
           }}
         >
-          <div
-            style={{
-              position: "absolute",
-              inset: "0 0 0 auto",
-              width: 234,
-              backgroundColor: BRAND_DEEP,
-            }}
-          />
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "minmax(0, 1fr) 234px",
-              alignItems: "stretch",
-            }}
-          >
-            <div
-              style={{
-                position: "relative",
-                display: "flex",
-                alignItems: "center",
-                minWidth: 0,
-                padding: "30px 28px",
-              }}
-            >
-              <div
+          <tbody>
+            <tr>
+              <td
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 18,
-                  minWidth: 0,
+                  width: "62%",
+                  padding: "26px 32px",
+                  verticalAlign: "middle",
+                  backgroundColor: "#ffffff",
                 }}
               >
-                <img
-                  src={LOGO}
-                  alt="Starlink Jewels"
-                  style={{ height: 72, width: "auto", flexShrink: 0 }}
-                />
-                <div
-                  style={{
-                    width: 1,
-                    height: 64,
-                    backgroundColor: BRAND_BORDER,
-                    flexShrink: 0,
-                  }}
-                />
-                <div style={{ minWidth: 0, maxWidth: 280 }}>
-                  <div
-                    style={{
-                      color: BRAND,
-                      fontSize: 10,
-                      fontWeight: 700,
-                      letterSpacing: "0.28em",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Starlink Jewels
-                  </div>
-                  <div
-                    style={{
-                      marginTop: 8,
-                      color: BRAND_DEEP,
-                      fontFamily: '"Cormorant Garamond", serif',
-                      fontSize: 31,
-                      fontWeight: 700,
-                      letterSpacing: "0.14em",
-                      textTransform: "uppercase",
-                      lineHeight: 1.02,
-                    }}
-                  >
-                    Quotation
-                  </div>
-                  <div
-                    style={{
-                      marginTop: 8,
-                      color: SUBTEXT,
-                      fontSize: 11,
-                      letterSpacing: "0.22em",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Custom Jewelry Proposal
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              style={{
-                position: "relative",
-                minWidth: 0,
-                padding: "28px 24px 24px",
-                color: "#ffffff",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-              }}
-            >
-              {showQuoteNo ? (
-                <div
-                  style={{
-                    color: "rgba(255,255,255,0.72)",
-                    fontSize: 10,
-                    fontWeight: 700,
-                    letterSpacing: "0.24em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Quote No.
-                </div>
-              ) : null}
-              {showQuoteNo ? (
-                <div
-                  style={{
-                    marginTop: 10,
-                    color: "#ffffff",
-                    fontFamily: '"Cormorant Garamond", serif',
-                    fontSize: 28,
-                    fontWeight: 700,
-                    letterSpacing: "0.08em",
-                    lineHeight: 1.08,
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {q.quoteNo}
-                </div>
-              ) : null}
-              {showDate ? (
-                <div
-                  style={{
-                    fontSize: 10,
-                    letterSpacing: "0.18em",
-                    textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.78)",
-                    marginTop: showQuoteNo ? 12 : 0,
-                  }}
-                >
-                  {q.date}
-                </div>
-              ) : null}
-              {showValidity || showStatus ? (
-                <div
-                  style={{
-                    marginTop: 20,
-                    paddingTop: 18,
-                    borderTop: "1px solid rgba(255,255,255,0.18)",
-                  }}
-                >
-                  {showValidity ? (
+                <table style={{ borderCollapse: "collapse" }}>
+                  <tbody>
+                    <tr>
+                      <td style={{ paddingRight: 18, verticalAlign: "middle" }}>
+                        <img
+                          src={LOGO}
+                          alt="Starlink Jewels"
+                          style={{ height: 64, width: "auto", display: "block" }}
+                        />
+                      </td>
+                      <td
+                        style={{
+                          paddingLeft: 18,
+                          borderLeft: `1px solid ${BRAND_BORDER}`,
+                          verticalAlign: "middle",
+                        }}
+                      >
+                        <div
+                          style={{
+                            color: BRAND,
+                            fontSize: 10,
+                            fontWeight: 700,
+                            letterSpacing: "0.32em",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Starlink Jewels
+                        </div>
+                        <div
+                          style={{
+                            marginTop: 6,
+                            color: BRAND_DEEP,
+                            fontFamily: '"Cormorant Garamond", serif',
+                            fontSize: 30,
+                            fontWeight: 700,
+                            letterSpacing: "0.18em",
+                            textTransform: "uppercase",
+                            lineHeight: 1,
+                          }}
+                        >
+                          Quotation
+                        </div>
+                        <div
+                          style={{
+                            marginTop: 6,
+                            color: SUBTEXT,
+                            fontSize: 10,
+                            letterSpacing: "0.24em",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Custom Jewelry Proposal
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+              <td
+                style={{
+                  width: "38%",
+                  padding: "26px 28px",
+                  verticalAlign: "middle",
+                  backgroundColor: BRAND_DEEP,
+                  color: "#ffffff",
+                }}
+              >
+                {showQuoteNo ? (
+                  <>
                     <div
                       style={{
-                        color: "rgba(255,255,255,0.68)",
-                        fontSize: 10,
+                        color: "rgba(255,255,255,0.7)",
+                        fontSize: 9,
                         fontWeight: 700,
-                        letterSpacing: "0.22em",
+                        letterSpacing: "0.28em",
                         textTransform: "uppercase",
                       }}
                     >
-                      Validity
+                      Quote No.
                     </div>
-                  ) : null}
+                    <div
+                      style={{
+                        marginTop: 6,
+                        fontFamily: '"Cormorant Garamond", serif',
+                        fontSize: 24,
+                        fontWeight: 700,
+                        letterSpacing: "0.08em",
+                        lineHeight: 1.1,
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {q.quoteNo}
+                    </div>
+                  </>
+                ) : null}
+                {showDate || showValidity || showStatus ? (
                   <div
                     style={{
-                      marginTop: showValidity ? 6 : 0,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: 12,
+                      marginTop: showQuoteNo ? 14 : 0,
+                      paddingTop: showQuoteNo ? 12 : 0,
+                      borderTop: showQuoteNo
+                        ? "1px solid rgba(255,255,255,0.18)"
+                        : "none",
+                      fontSize: 10,
+                      letterSpacing: "0.16em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.85)",
+                      lineHeight: 1.7,
                     }}
                   >
-                    {showValidity ? (
-                      <span
-                        style={{
-                          color: "#ffffff",
-                          fontSize: 13,
-                          fontWeight: 600,
-                        }}
-                      >
-                        {q.validity}
-                      </span>
-                    ) : <span />}
+                    {showDate ? <div>Date: {q.date}</div> : null}
+                    {showValidity ? <div>Valid: {q.validity}</div> : null}
                     {showStatus ? (
-                      <span
-                        style={{
-                          borderRadius: 9999,
-                          backgroundColor: "rgba(255,255,255,0.14)",
-                          padding: "7px 12px",
-                          color: "#ffffff",
-                          fontSize: 10,
-                          fontWeight: 700,
-                          letterSpacing: "0.2em",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        {q.status}
-                      </span>
+                      <div style={{ marginTop: 8 }}>
+                        <span
+                          style={{
+                            display: "inline-block",
+                            backgroundColor: "rgba(255,255,255,0.16)",
+                            padding: "5px 10px",
+                            borderRadius: 4,
+                            fontSize: 9,
+                            fontWeight: 700,
+                            letterSpacing: "0.22em",
+                          }}
+                        >
+                          {q.status}
+                        </span>
+                      </div>
                     ) : null}
                   </div>
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </div>
+                ) : null}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <div style={{ padding: "24px 44px" }}>
