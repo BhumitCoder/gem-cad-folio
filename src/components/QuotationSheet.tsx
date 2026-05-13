@@ -167,7 +167,7 @@ export function QuotationSheet({
   const showQuoteNo = hasText(q.quoteNo);
   const showDate = hasText(q.date);
   const showValidity = hasText(q.validity);
-  const showStatus = hasText(q.status);
+  const showStatus = false;
   const showTotalPrice = hasText(q.totalPrice);
   const showCurrency = hasText(q.currency);
   const showSalesEmail = hasText(q.salesEmail);
