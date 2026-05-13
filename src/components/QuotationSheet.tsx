@@ -183,7 +183,7 @@ export function QuotationSheet({
         fontFamily: "Poppins, sans-serif",
       }}
     >
-      <div style={{ borderBottom: `1px solid ${BRAND_BORDER}` }}>
+      <div data-pdf-section style={{ borderBottom: `1px solid ${BRAND_BORDER}` }}>
         <div style={{ height: 6, backgroundColor: BRAND_DEEP }} />
         <table
           style={{
