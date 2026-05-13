@@ -342,7 +342,7 @@ export function QuotationSheet({
 
       <div style={{ padding: "24px 44px" }}>
         {customerRows.length ? (
-          <>
+          <div data-pdf-section>
             <SectionTitle>Customer Details</SectionTitle>
             <table
               style={{
@@ -369,11 +369,11 @@ export function QuotationSheet({
                 ))}
               </tbody>
             </table>
-          </>
+          </div>
         ) : null}
 
         {imageRows.length ? (
-          <>
+          <div data-pdf-section>
             <SectionTitle>Product Preview / 4 View CAD</SectionTitle>
             <div
               style={{
@@ -386,11 +386,12 @@ export function QuotationSheet({
                 <ImageBox key={image.label} src={image.src} label={image.label} />
               ))}
             </div>
-          </>
+          </div>
         ) : null}
 
         {q.productLink ? (
           <div
+            data-pdf-section
             style={{
               marginTop: 16,
               display: "flex",
@@ -442,7 +443,7 @@ export function QuotationSheet({
         ) : null}
 
         {specRows.length ? (
-          <>
+          <div data-pdf-section>
             <SectionTitle>Jewelry Specifications</SectionTitle>
             <table
               style={{
@@ -474,11 +475,11 @@ export function QuotationSheet({
                 ))}
               </tbody>
             </table>
-          </>
+          </div>
         ) : null}
 
         {diamondRows.length ? (
-          <>
+          <div data-pdf-section>
             <SectionTitle>Diamond Breakdown</SectionTitle>
             <table
               style={{
@@ -525,11 +526,11 @@ export function QuotationSheet({
                 ))}
               </tbody>
             </table>
-          </>
+          </div>
         ) : null}
 
         {priceRows.length || showTotalPrice ? (
-          <>
+          <div data-pdf-section>
             <SectionTitle>Price Breakdown</SectionTitle>
             <table
               style={{
@@ -589,11 +590,11 @@ export function QuotationSheet({
                 ) : null}
               </tbody>
             </table>
-          </>
+          </div>
         ) : null}
 
         {termRows.length ? (
-          <>
+          <div data-pdf-section>
             <SectionTitle>Terms & Conditions</SectionTitle>
             <ul
               style={{
@@ -615,11 +616,11 @@ export function QuotationSheet({
                 </li>
               ))}
             </ul>
-          </>
+          </div>
         ) : null}
 
         {q.notes ? (
-          <>
+          <div data-pdf-section>
             <SectionTitle>Notes</SectionTitle>
             <p
               style={{
@@ -630,11 +631,12 @@ export function QuotationSheet({
             >
               {q.notes}
             </p>
-          </>
+          </div>
         ) : null}
       </div>
 
       <div
+        data-pdf-section
         style={{
           marginTop: 16,
           padding: "24px 44px",
