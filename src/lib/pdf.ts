@@ -1,6 +1,33 @@
 import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
 
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const SCALE = 3;
+
+/** A4 dimensions in mm */
+const PAGE_W_MM = 210;
+const PAGE_H_MM = 297;
+
+/** Page margins in mm */
+const MARGIN_TOP_MM = 12;
+const MARGIN_BOTTOM_MM = 12;
+const MARGIN_SIDE_MM = 10;
+
+/** Gap between sections on the same page (mm) */
+const SECTION_GAP_MM = 6;
+
+/**
+ * If a section's height is below this fraction of the usable page height,
+ * it will be pushed to the next page rather than split across pages.
+ * Sections taller than this threshold are sliced across pages.
+ *
+ * Example: 0.6 means sections up to 60% of page height are kept intact.
+ */
+const SPLIT_THRESHOLD = 0.6;
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function waitForImages(root: ParentNode) {
   const images = Array.from(root.querySelectorAll("img"));
   return Promise.all(
@@ -31,9 +58,7 @@ function stripEffects(root: HTMLElement) {
   });
 }
 
-const SCALE = 3;
-
-async function renderSection(el: HTMLElement) {
+async function renderSection(el: HTMLElement): Promise<HTMLCanvasElement> {
   return html2canvas(el, {
     backgroundColor: "#ffffff",
     logging: false,
@@ -43,18 +68,85 @@ async function renderSection(el: HTMLElement) {
   });
 }
 
+/**
+ * Slice a canvas vertically and add each slice as a new PDF page.
+ */
+function addSlicedCanvasToPDF(
+  pdf: jsPDF,
+  canvas: HTMLCanvasElement,
+  contentWidthMm: number,
+  usableHeightMm: number,
+  startY: number,
+  sideMargin: number,
+  topMargin: number,
+): number {
+  const pxPerMm = canvas.width / contentWidthMm;
+  const pageHeightPx = Math.floor(usableHeightMm * pxPerMm);
+  let renderedPx = 0;
+  let cursorY = startY;
+  let firstSlice = true;
+
+  while (renderedPx < canvas.height) {
+    const sliceHeightPx = Math.min(pageHeightPx, canvas.height - renderedPx);
+    const pageCanvas = document.createElement("canvas");
+    pageCanvas.width = canvas.width;
+    pageCanvas.height = sliceHeightPx;
+
+    const ctx = pageCanvas.getContext("2d");
+    if (!ctx) throw new Error("Canvas context unavailable");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+    ctx.drawImage(
+      canvas,
+      0, renderedPx, canvas.width, sliceHeightPx,
+      0, 0,          canvas.width, sliceHeightPx,
+    );
+
+    const sliceHeightMm = sliceHeightPx / pxPerMm;
+
+    if (!firstSlice) {
+      pdf.addPage();
+      cursorY = topMargin;
+    }
+
+    pdf.addImage(
+      pageCanvas.toDataURL("image/jpeg", 0.95),
+      "JPEG",
+      sideMargin,
+      cursorY,
+      contentWidthMm,
+      sliceHeightMm,
+      undefined,
+      "FAST",
+    );
+
+    renderedPx += sliceHeightPx;
+    cursorY += sliceHeightMm;
+    firstSlice = false;
+  }
+
+  return cursorY;
+}
+
+// ─── Main Export ──────────────────────────────────────────────────────────────
+
 export async function exportElementToPDF(el: HTMLElement, filename: string) {
+  // ── 1. Prepare off-screen clone ──────────────────────────────────────────
   const stage = document.createElement("div");
-  stage.style.position = "fixed";
-  stage.style.left = "-10000px";
-  stage.style.top = "0";
-  stage.style.width = "794px";
-  stage.style.background = "#ffffff";
-  stage.style.zIndex = "-1";
-  stage.style.pointerEvents = "none";
+  stage.style.cssText = [
+    "position: fixed",
+    "left: -10000px",
+    "top: 0",
+    `width: ${PAGE_W_MM - MARGIN_SIDE_MM * 2}px`, // match content width
+    "background: #ffffff",
+    "z-index: -1",
+    "pointer-events: none",
+  ].join(";");
 
   const clone = el.cloneNode(true) as HTMLElement;
   stripEffects(clone);
+
+  // Fix relative image paths
   Array.from(clone.querySelectorAll("img")).forEach((img) => {
     const rawSrc = img.getAttribute("src");
     if (rawSrc?.startsWith("/")) {
@@ -66,114 +158,111 @@ export async function exportElementToPDF(el: HTMLElement, filename: string) {
   document.body.appendChild(stage);
 
   try {
+    // ── 2. Wait for fonts & images ─────────────────────────────────────────
     if ("fonts" in document) {
       await (document as Document & { fonts: FontFaceSet }).fonts.ready;
     }
     await waitForImages(clone);
 
+    // ── 3. Set up PDF ──────────────────────────────────────────────────────
     const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
-    const pageWidth = pdf.internal.pageSize.getWidth(); // 210
-    const pageHeight = pdf.internal.pageSize.getHeight(); // 297
-    const sideMargin = 0; // sheet already has its own padding
-    const topMargin = 0;
-    const contentWidth = pageWidth - sideMargin * 2;
-    const usableHeight = pageHeight - topMargin * 2;
 
+    const sideMargin  = MARGIN_SIDE_MM;
+    const topMargin   = MARGIN_TOP_MM;
+    const bottomMargin = MARGIN_BOTTOM_MM;
+    const contentWidthMm = PAGE_W_MM - sideMargin * 2;
+    const usableHeightMm = PAGE_H_MM - topMargin - bottomMargin;
+
+    // ── 4. Collect sections ────────────────────────────────────────────────
     const sections = Array.from(
       clone.querySelectorAll<HTMLElement>("[data-pdf-section]"),
     );
 
+    // No sections → render whole element as one block
     if (sections.length === 0) {
       const canvas = await renderSection(clone);
-      const heightMm = (canvas.height * contentWidth) / canvas.width;
-      pdf.addImage(
-        canvas.toDataURL("image/jpeg", 0.95),
-        "JPEG",
-        sideMargin,
-        topMargin,
-        contentWidth,
-        heightMm,
-        undefined,
-        "FAST",
-      );
+      const totalHeightMm = (canvas.height * contentWidthMm) / canvas.width;
+
+      if (totalHeightMm <= usableHeightMm) {
+        // Fits on one page — center it vertically for a clean look
+        const verticalOffset = (usableHeightMm - totalHeightMm) / 2;
+        pdf.addImage(
+          canvas.toDataURL("image/jpeg", 0.95),
+          "JPEG",
+          sideMargin,
+          topMargin + verticalOffset,
+          contentWidthMm,
+          totalHeightMm,
+          undefined,
+          "FAST",
+        );
+      } else {
+        // Slice across pages
+        addSlicedCanvasToPDF(
+          pdf, canvas, contentWidthMm, usableHeightMm,
+          topMargin, sideMargin, topMargin,
+        );
+      }
+
       pdf.save(filename);
       return;
     }
 
+    // ── 5. Render each section with smart page-break logic ─────────────────
     let cursorY = topMargin;
-    let firstOnPage = true;
-    const gapMm = 4;
+    let isFirstOnPage = true;
 
     for (const section of sections) {
       const canvas = await renderSection(section);
-      const sectionHeightMm = (canvas.height * contentWidth) / canvas.width;
+      const sectionHeightMm = (canvas.height * contentWidthMm) / canvas.width;
       const imgData = canvas.toDataURL("image/jpeg", 0.95);
 
-      // If section is taller than a page, slice it across pages.
-      if (sectionHeightMm > usableHeight) {
-        if (!firstOnPage) {
+      // Add gap between sections (not before the very first on a page)
+      const gapBefore = isFirstOnPage ? 0 : SECTION_GAP_MM;
+      const spaceNeeded = sectionHeightMm + gapBefore;
+      const remaining = PAGE_H_MM - bottomMargin - cursorY;
+
+      // ── Decision: split or push? ────────────────────────────────────────
+      const isTall = sectionHeightMm > usableHeightMm * SPLIT_THRESHOLD;
+
+      if (isTall) {
+        // Tall section → always slice across pages, starting on a fresh page
+        if (!isFirstOnPage) {
           pdf.addPage();
           cursorY = topMargin;
-          firstOnPage = true;
+          isFirstOnPage = true;
         }
-        const pxPerMm = canvas.width / contentWidth;
-        const pageHeightPx = Math.floor(usableHeight * pxPerMm);
-        let renderedPx = 0;
-        while (renderedPx < canvas.height) {
-          const sliceHeight = Math.min(pageHeightPx, canvas.height - renderedPx);
-          const pageCanvas = document.createElement("canvas");
-          pageCanvas.width = canvas.width;
-          pageCanvas.height = sliceHeight;
-          const ctx = pageCanvas.getContext("2d");
-          if (!ctx) throw new Error("Canvas context unavailable");
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-          ctx.drawImage(
-            canvas,
-            0, renderedPx, canvas.width, sliceHeight,
-            0, 0, canvas.width, sliceHeight,
-          );
-          const sliceMm = sliceHeight / pxPerMm;
-          if (renderedPx > 0) {
-            pdf.addPage();
-            cursorY = topMargin;
-          }
-          pdf.addImage(
-            pageCanvas.toDataURL("image/jpeg", 0.95),
-            "JPEG",
-            sideMargin,
-            cursorY,
-            contentWidth,
-            sliceMm,
-            undefined,
-            "FAST",
-          );
-          renderedPx += sliceHeight;
-          cursorY += sliceMm;
-          firstOnPage = false;
-        }
+        cursorY = addSlicedCanvasToPDF(
+          pdf, canvas, contentWidthMm, usableHeightMm,
+          cursorY, sideMargin, topMargin,
+        );
+        // After slicing, continue from where we left off (no extra gap here)
+        isFirstOnPage = false;
         continue;
       }
 
-      const remaining = pageHeight - cursorY;
-      if (sectionHeightMm > remaining && !firstOnPage) {
+      // Short/medium section → keep intact; push to next page if it won't fit
+      if (spaceNeeded > remaining && !isFirstOnPage) {
         pdf.addPage();
         cursorY = topMargin;
-        firstOnPage = true;
+        isFirstOnPage = true;
       }
+
+      const drawY = isFirstOnPage ? cursorY : cursorY + SECTION_GAP_MM;
 
       pdf.addImage(
         imgData,
         "JPEG",
         sideMargin,
-        cursorY,
-        contentWidth,
+        drawY,
+        contentWidthMm,
         sectionHeightMm,
         undefined,
         "FAST",
       );
-      cursorY += sectionHeightMm + gapMm;
-      firstOnPage = false;
+
+      cursorY = drawY + sectionHeightMm;
+      isFirstOnPage = false;
     }
 
     pdf.save(filename);
