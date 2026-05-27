@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { isAuthed, logout } from "@/lib/auth";
+import { useDataRefresh } from "@/hooks/useDataRefresh";
 import {
   blankClient,
   loadAllClients,
@@ -48,6 +49,7 @@ export const Route = createFileRoute("/")({
 
 function Dashboard() {
   const navigate = useNavigate();
+  useDataRefresh();
   const [clients, setClients] = useState<Client[]>([]);
   const [quotes, setQuotes] = useState<Quotation[]>([]);
   const [ready, setReady] = useState(false);
@@ -60,9 +62,14 @@ function Dashboard() {
       navigate({ to: "/login" });
       return;
     }
-    setClients(loadAllClients());
-    setQuotes(loadAll());
-    setReady(true);
+    const refresh = () => {
+      setClients(loadAllClients());
+      setQuotes(loadAll());
+      setReady(true);
+    };
+    refresh();
+    window.addEventListener("starlink:data-changed", refresh);
+    return () => window.removeEventListener("starlink:data-changed", refresh);
   }, [navigate]);
 
   const filtered = useMemo(() => {
