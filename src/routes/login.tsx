@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { isAuthed, login } from "@/lib/auth";
 import { toast } from "sonner";
-import { Eye, EyeOff, LogIn } from "lucide-react";
+import { Eye, EyeOff, LogIn, Gem } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -38,134 +38,100 @@ function LoginPage() {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center"
-      style={{
-        background: "linear-gradient(135deg, #070F2B 0%, #0D1E52 40%, #0F2460 70%, #071540 100%)",
-      }}
-    >
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: `
-            radial-gradient(ellipse 80% 60% at 20% 80%, rgba(201,168,76,0.06) 0%, transparent 60%),
-            radial-gradient(ellipse 60% 50% at 80% 20%, rgba(201,168,76,0.04) 0%, transparent 60%)
-          `,
-        }}
-      />
+    <div className="login-page">
+      {/* Animated orb background */}
+      <div className="login-orb login-orb-1" />
+      <div className="login-orb login-orb-2" />
+      <div className="login-orb login-orb-3" />
 
-      <div className="relative z-10 w-full max-w-[440px] mx-6">
-        <div className="text-center mb-10">
-          <img
-            src="/starlink-jewels-logo.png"
-            alt="Starlink Jewels"
-            className="h-16 w-auto mx-auto mb-6 brightness-0 invert opacity-95"
-          />
-          <h1 className="font-display text-white text-3xl font-bold tracking-wide mb-2">
-            Starlink Jewels
-          </h1>
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <div className="h-px flex-1 max-w-[60px]" style={{ background: "linear-gradient(90deg, transparent, #C9A84C)" }} />
-            <div className="w-1.5 h-1.5 rotate-45 bg-[#C9A84C]" />
-            <span className="text-[#C9A84C] text-[10px] uppercase tracking-[0.25em] font-semibold">Quotation Portal</span>
-            <div className="w-1.5 h-1.5 rotate-45 bg-[#C9A84C]" />
-            <div className="h-px flex-1 max-w-[60px]" style={{ background: "linear-gradient(90deg, #C9A84C, transparent)" }} />
+      {/* Noise texture overlay */}
+      <div className="login-noise" />
+
+      <div className="login-content">
+        {/* Brand header */}
+        <div className="login-brand">
+          <div className="login-logo-wrap">
+            <img
+              src="/starlink-jewels-logo.png"
+              alt="Starlink Jewels"
+              className="login-logo-img"
+            />
+          </div>
+          <h1 className="login-brand-name">Starlink Jewels</h1>
+          <div className="login-brand-divider">
+            <span className="login-divider-line" />
+            <Gem className="login-divider-gem" />
+            <span className="login-brand-tag">Quotation Portal</span>
+            <Gem className="login-divider-gem" />
+            <span className="login-divider-line" />
           </div>
         </div>
 
-        <div
-          className="rounded-2xl overflow-hidden"
-          style={{
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(201,168,76,0.15)",
-            boxShadow: "0 24px 64px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04) inset",
-            backdropFilter: "blur(16px)",
-          }}
-        >
-          <div className="px-8 py-8">
-            <div className="mb-7">
-              <h2 className="text-white text-xl font-semibold mb-1">Welcome back</h2>
-              <p className="text-white/40 text-sm">Sign in to access your portal</p>
+        {/* Glass card */}
+        <div className="glass-card login-card">
+          <div className="login-card-header">
+            <h2 className="login-title">Welcome back</h2>
+            <p className="login-subtitle">Sign in to access your portal</p>
+          </div>
+
+          <form onSubmit={submit} className="login-form">
+            <div className="login-field">
+              <label className="glass-label">Username</label>
+              <input
+                type="text"
+                autoComplete="username"
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="glass-input"
+              />
             </div>
 
-            <form onSubmit={submit} className="space-y-5">
-              <div>
-                <label className="block text-[11px] font-semibold text-[#C9A84C] uppercase tracking-[0.18em] mb-2">
-                  Username
-                </label>
+            <div className="login-field">
+              <label className="glass-label">Password</label>
+              <div className="glass-input-wrap">
                 <input
-                  type="text"
-                  autoComplete="username"
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="login-input"
+                  type={showPass ? "text" : "password"}
+                  autoComplete="current-password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="glass-input"
+                  style={{ paddingRight: "3rem" }}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="glass-eye-btn"
+                >
+                  {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
+            </div>
 
-              <div>
-                <label className="block text-[11px] font-semibold text-[#C9A84C] uppercase tracking-[0.18em] mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPass ? "text" : "password"}
-                    autoComplete="current-password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="login-input pr-12"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPass(!showPass)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors p-1"
-                  >
-                    {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
+            <button
+              type="submit"
+              disabled={busy}
+              className="gold-btn"
+            >
+              {busy ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                  Signing in...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <LogIn className="h-4 w-4" />
+                  Sign In
+                </span>
+              )}
+            </button>
+          </form>
 
-              <button
-                type="submit"
-                disabled={busy}
-                className="w-full h-12 rounded-xl flex items-center justify-center gap-2.5 text-sm font-semibold mt-2 transition-all"
-                style={{
-                  background: busy
-                    ? "rgba(201,168,76,0.5)"
-                    : "linear-gradient(135deg, #C9A84C 0%, #E8C96A 100%)",
-                  color: "#0D1E52",
-                  boxShadow: busy ? "none" : "0 4px 20px rgba(201,168,76,0.3)",
-                }}
-              >
-                {busy ? (
-                  <span className="flex items-center gap-2">
-                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                    </svg>
-                    Signing in...
-                  </span>
-                ) : (
-                  <>
-                    <LogIn className="h-4 w-4" />
-                    Sign In
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-
-          <div
-            className="px-8 py-4 flex items-center justify-center gap-2"
-            style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
-          >
-            <div className="w-1 h-1 rotate-45 bg-[#C9A84C]/50" />
-            <p className="text-white/25 text-xs tracking-widest uppercase">
-              Custom Jewelry Quotations
-            </p>
-            <div className="w-1 h-1 rotate-45 bg-[#C9A84C]/50" />
-          </div>
+          <p className="login-footer-text">Custom Jewelry Quotation Management</p>
         </div>
       </div>
     </div>

@@ -75,24 +75,27 @@ function Dashboard() {
   if (!ready) return null;
 
   return (
-    <div className="min-h-screen" style={{ background: "#F5F4F0" }}>
+    <div className="dash-page">
+      <div className="dash-bg-orb-1" />
+      <div className="dash-bg-orb-2" />
+
       <AppHeader
         portalLabel="Quotation Portal"
         rightSlot={
           <button
             onClick={() => { logout(); navigate({ to: "/login" }); }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition text-sm font-medium"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition text-sm font-medium"
           >
             <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Logout</span>
+            <span>Logout</span>
           </button>
         }
       />
 
-      <main className="page-shell py-8 space-y-7">
+      <div className="dash-main">
 
         {/* ── Page title + actions ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4">
           <div>
             <h1 className="font-display text-navy text-2xl lg:text-3xl font-bold">Client Dashboard</h1>
             <p className="text-gray-500 text-sm mt-0.5">Manage clients and quotations</p>
@@ -124,15 +127,14 @@ function Dashboard() {
         </div>
 
         {/* ── Search ── */}
-        <div className="relative">
+        <div className="relative search-glass rounded-xl overflow-hidden">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
           <input
             type="text"
             placeholder="Search clients by name, email, company or country…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input-premium pl-11 w-full shadow-sm"
-            style={{ height: "3rem" }}
+            className="w-full bg-transparent border-none outline-none text-sm text-gray-700 placeholder-gray-400 pl-11 pr-10 py-3.5"
           />
           {search && (
             <button
@@ -186,7 +188,7 @@ function Dashboard() {
             })}
           </div>
         )}
-      </main>
+      </div>
 
       {/* ── New Client Modal ── */}
       {showNewClient && (
@@ -219,20 +221,13 @@ function StatCard({
   accent: "navy" | "gold";
 }) {
   return (
-    <div className="card-premium-static p-5 flex items-center gap-4">
-      <div
-        className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-        style={{
-          background: accent === "gold"
-            ? "linear-gradient(135deg, #C9A84C, #E8C96A)"
-            : "linear-gradient(135deg, #0D1E52, #1A3179)",
-        }}
-      >
+    <div className="stat-card">
+      <div className={`stat-icon ${accent === "gold" ? "stat-icon-gold" : "stat-icon-navy"}`}>
         <Icon className="h-5 w-5 text-white" />
       </div>
       <div>
-        <p className="text-2xl font-bold text-navy leading-none">{value}</p>
-        <p className="text-gray-500 text-xs font-medium mt-1">{label}</p>
+        <p className="stat-value">{value}</p>
+        <p className="stat-label">{label}</p>
       </div>
     </div>
   );
@@ -269,23 +264,23 @@ function ClientCard({
     : "linear-gradient(135deg, #1A3179, #0D3066)";
 
   return (
-    <div className="card-premium flex flex-col">
+    <div className="client-card">
       <Link to="/clients/$id" params={{ id: client.id }} className="flex-1 p-5 block">
         <div className="flex items-start gap-3 mb-4">
           <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-base shrink-0 shadow-md"
+            className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-md"
             style={{ background: hue }}
           >
             {initials}
           </div>
           <div className="flex-1 min-w-0 pt-0.5">
-            <h3 className="font-display font-bold text-navy text-base leading-tight truncate">{client.name}</h3>
+            <h3 className="font-display font-bold text-navy text-[15px] leading-tight truncate">{client.name}</h3>
             <p className="text-gray-500 text-xs truncate mt-0.5">{client.company || client.country || "Private Client"}</p>
           </div>
-          <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-navy shrink-0 mt-1 transition" />
+          <ChevronRight className="h-4 w-4 text-gray-300 shrink-0 mt-1" />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {client.email && (
             <div className="flex items-center gap-2 text-xs text-gray-500">
               <Mail className="h-3.5 w-3.5 text-gray-400 shrink-0" />
@@ -300,7 +295,7 @@ function ClientCard({
           )}
         </div>
 
-        <div className="mt-4 pt-3.5 border-t border-gray-100 flex items-center justify-between">
+        <div className="mt-4 pt-3.5 border-t border-black/5 flex items-center justify-between">
           <span className="text-xs text-gray-400 font-medium">
             <span className="text-navy font-bold text-sm">{quoteCount}</span>{" "}
             {quoteCount === 1 ? "quotation" : "quotations"}
@@ -313,10 +308,10 @@ function ClientCard({
         </div>
       </Link>
 
-      <div className="px-5 pb-4">
+      <div className="px-5 pb-4 border-t border-black/5">
         <button
           onClick={(e) => { e.preventDefault(); onDelete(); }}
-          className="flex items-center gap-1.5 text-[11px] text-gray-400 hover:text-red-500 transition py-1 font-medium"
+          className="flex items-center gap-1.5 text-[11px] text-gray-400 hover:text-red-500 transition py-2.5 font-medium"
         >
           <Trash2 className="h-3.5 w-3.5" />
           Remove client
@@ -328,8 +323,8 @@ function ClientCard({
 
 function EmptyClients({ hasSearch, onAdd }: { hasSearch: boolean; onAdd: () => void }) {
   return (
-    <div className="card-premium-static border-2 border-dashed border-gray-200 p-16 text-center">
-      <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+    <div className="card-premium-static border-2 border-dashed border-black/10 p-16 text-center">
+      <div className="w-16 h-16 rounded-2xl bg-black/5 flex items-center justify-center mx-auto mb-4">
         <Users className="h-8 w-8 text-gray-300" />
       </div>
       <h3 className="font-display text-navy text-xl font-bold mb-1.5">
@@ -371,15 +366,14 @@ function NewClientModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        {/* Modal header */}
-        <div className="navy-gradient rounded-t-2xl px-6 py-5 flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+      <div className="modal-glass w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="modal-header">
           <div>
             <h2 className="font-display text-white text-xl font-bold">New Client</h2>
-            <p className="text-white/60 text-xs mt-0.5">Fill in the client details below</p>
+            <p className="text-white/50 text-xs mt-0.5">Fill in the client details below</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-white/10 transition text-white/70 hover:text-white">
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-white/10 transition text-white/60 hover:text-white">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -387,7 +381,7 @@ function NewClientModal({
         <div className="px-6 py-5 space-y-4">
           {fields.map(({ label, key, type, placeholder }) => (
             <div key={key}>
-              <label className="block text-[11px] font-semibold text-navy uppercase tracking-wider mb-1.5">{label}</label>
+              <label className="block text-[11px] font-semibold text-navy/70 uppercase tracking-wider mb-1.5">{label}</label>
               <input
                 type={type || "text"}
                 placeholder={placeholder}
@@ -398,7 +392,7 @@ function NewClientModal({
             </div>
           ))}
           <div>
-            <label className="block text-[11px] font-semibold text-navy uppercase tracking-wider mb-1.5">Notes (optional)</label>
+            <label className="block text-[11px] font-semibold text-navy/70 uppercase tracking-wider mb-1.5">Notes (optional)</label>
             <textarea
               rows={3}
               placeholder="Any notes about this client..."
