@@ -1,23 +1,7 @@
 import { useRef } from "react";
-import type {
-  DiamondRow,
-  PriceRow,
-  Quotation,
-  QuotationStatus,
-} from "@/lib/quotations";
+import type { DiamondRow, PriceRow, Quotation, QuotationStatus } from "@/lib/quotations";
 import { QUOTATION_STATUSES } from "@/lib/quotations";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, Upload } from "lucide-react";
+import { Plus, Trash2, Upload, X } from "lucide-react";
 
 function readFileAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -28,67 +12,86 @@ function readFileAsDataURL(file: File): Promise<string> {
   });
 }
 
-function Row({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-1 gap-3 md:grid-cols-2">{children}</div>;
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="text-base font-bold text-slate-700 mb-4 pb-2 border-b-2 border-slate-100">
+      {children}
+    </h3>
+  );
 }
 
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div>
-      <Label className="mb-1.5 block text-xs uppercase tracking-wider text-muted-foreground">
+      <label className="block text-sm font-semibold text-slate-600 mb-1.5">
         {label}
-      </Label>
+        {required && <span className="text-red-400 ml-1">*</span>}
+      </label>
       {children}
     </div>
   );
 }
 
-function ImageField({
-  label,
+function TextInput({
   value,
   onChange,
+  placeholder,
+  type = "text",
 }: {
-  label: string;
   value: string;
   onChange: (v: string) => void;
+  placeholder?: string;
+  type?: string;
 }) {
+  return (
+    <input
+      type={type}
+      value={value}
+      placeholder={placeholder}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full h-11 px-3.5 rounded-xl border-2 border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-blue-400 transition bg-slate-50 placeholder:text-slate-300"
+    />
+  );
+}
+
+function ImageField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   const ref = useRef<HTMLInputElement>(null);
 
   return (
     <div>
-      <Label className="mb-1.5 block text-xs uppercase tracking-wider text-muted-foreground">
-        {label}
-      </Label>
+      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 text-center">{label}</p>
       <div
-        onClick={() => ref.current?.click()}
-        className="group relative aspect-square cursor-pointer overflow-hidden rounded-md border border-dashed border-border bg-muted/40 transition hover:border-primary"
+        onClick={() => !value && ref.current?.click()}
+        className={`relative aspect-square overflow-hidden rounded-xl border-2 transition ${
+          value
+            ? "border-blue-200 cursor-default"
+            : "border-dashed border-slate-300 cursor-pointer hover:border-blue-400 hover:bg-blue-50"
+        } bg-slate-50`}
       >
         {value ? (
-          <img src={value} alt={label} className="h-full w-full object-cover" />
+          <>
+            <img src={value} alt={label} className="h-full w-full object-cover" />
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onChange(""); }}
+              className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition shadow-sm"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); ref.current?.click(); }}
+              className="absolute bottom-1.5 right-1.5 w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition shadow-sm"
+            >
+              <Upload className="h-3 w-3" />
+            </button>
+          </>
         ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground">
-            <Upload className="h-5 w-5" />
-            <span className="text-[11px]">Upload</span>
+          <div className="flex h-full flex-col items-center justify-center gap-1.5 text-slate-400">
+            <Upload className="h-6 w-6" />
+            <span className="text-xs font-medium">Upload</span>
           </div>
         )}
-        {value ? (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onChange("");
-            }}
-            className="absolute right-1 top-1 rounded bg-black/70 p-1 text-white opacity-0 transition group-hover:opacity-100"
-          >
-            <Trash2 className="h-3 w-3" />
-          </button>
-        ) : null}
       </div>
       <input
         ref={ref}
@@ -114,332 +117,235 @@ export function QuotationForm({
   onChange: (q: Quotation) => void;
   step?: 1 | 2 | 3;
 }) {
-  const update = (patch: Partial<Quotation>) => {
-    onChange({ ...value, ...patch });
-  };
-
-  const updateDiamond = (id: string, patch: Partial<DiamondRow>) =>
-    update({
-      diamonds: value.diamonds.map((diamond) =>
-        diamond.id === id ? { ...diamond, ...patch } : diamond,
-      ),
-    });
-
-  const addDiamond = () =>
-    update({
-      diamonds: [
-        ...value.diamonds,
-        {
-          id: crypto.randomUUID(),
-          shape: "Round",
-          size: "",
-          qty: 1,
-          totalWeight: 0,
-        },
-      ],
-    });
-
-  const removeDiamond = (id: string) =>
-    update({ diamonds: value.diamonds.filter((diamond) => diamond.id !== id) });
-
-  const updatePrice = (id: string, patch: Partial<PriceRow>) =>
-    update({
-      prices: value.prices.map((price) =>
-        price.id === id ? { ...price, ...patch } : price,
-      ),
-    });
-
-  const addPrice = () =>
-    update({
-      prices: [
-        ...value.prices,
-        { id: crypto.randomUUID(), description: "", amount: "" },
-      ],
-    });
-
-  const removePrice = (id: string) =>
-    update({ prices: value.prices.filter((price) => price.id !== id) });
-
+  const update = (patch: Partial<Quotation>) => onChange({ ...value, ...patch });
   const show = (s: 1 | 2 | 3) => step === undefined || step === s;
 
+  const updateDiamond = (id: string, patch: Partial<DiamondRow>) =>
+    update({ diamonds: value.diamonds.map((d) => (d.id === id ? { ...d, ...patch } : d)) });
+  const addDiamond = () =>
+    update({ diamonds: [...value.diamonds, { id: crypto.randomUUID(), shape: "", size: "", qty: 1, totalWeight: 0 }] });
+  const removeDiamond = (id: string) =>
+    update({ diamonds: value.diamonds.filter((d) => d.id !== id) });
+
+  const updatePrice = (id: string, patch: Partial<PriceRow>) =>
+    update({ prices: value.prices.map((p) => (p.id === id ? { ...p, ...patch } : p)) });
+  const addPrice = () =>
+    update({ prices: [...value.prices, { id: crypto.randomUUID(), description: "", amount: "" }] });
+  const removePrice = (id: string) =>
+    update({ prices: value.prices.filter((p) => p.id !== id) });
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+
+      {/* ── Step 1: Customer ── */}
       {show(1) && (
-      <section>
-        <h3 className="mb-3 font-display text-lg">Customer & Quote Info</h3>
-        <Row>
-          <Field label="Quote No.">
-            <Input
-              value={value.quoteNo}
-              onChange={(e) => update({ quoteNo: e.target.value })}
-            />
-          </Field>
-          <Field label="Date">
-            <Input
-              type="date"
-              value={value.date}
-              onChange={(e) => update({ date: e.target.value })}
-            />
-          </Field>
-          <Field label="Customer Name">
-            <Input
-              value={value.customerName}
-              onChange={(e) => update({ customerName: e.target.value })}
-            />
-          </Field>
-          <Field label="Customer Email">
-            <Input
-              value={value.customerEmail}
-              onChange={(e) => update({ customerEmail: e.target.value })}
-            />
-          </Field>
-          <Field label="Sales Executive">
-            <Input
-              value={value.salesExecutive}
-              onChange={(e) => update({ salesExecutive: e.target.value })}
-            />
-          </Field>
-          <Field label="Sales Email">
-            <Input
-              value={value.salesEmail}
-              onChange={(e) => update({ salesEmail: e.target.value })}
-            />
-          </Field>
-          <Field label="Validity">
-            <Input
-              value={value.validity}
-              onChange={(e) => update({ validity: e.target.value })}
-            />
-          </Field>
-          <Field label="Status">
-            <Select
-              value={value.status}
-              onValueChange={(v) => update({ status: v as QuotationStatus })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {QUOTATION_STATUSES.map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {status}
-                  </SelectItem>
+        <div className="space-y-4">
+          <SectionTitle>Quote Information</SectionTitle>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Quote Number">
+              <TextInput value={value.quoteNo} onChange={(v) => update({ quoteNo: v })} placeholder="SJ-2025-101" />
+            </Field>
+            <Field label="Date">
+              <input
+                type="date"
+                value={value.date}
+                onChange={(e) => update({ date: e.target.value })}
+                className="w-full h-11 px-3.5 rounded-xl border-2 border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-blue-400 transition bg-slate-50"
+              />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Validity">
+              <TextInput value={value.validity} onChange={(v) => update({ validity: v })} placeholder="7 Days" />
+            </Field>
+            <Field label="Status">
+              <select
+                value={value.status}
+                onChange={(e) => update({ status: e.target.value as QuotationStatus })}
+                className="w-full h-11 px-3.5 rounded-xl border-2 border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-blue-400 transition bg-slate-50"
+              >
+                {QUOTATION_STATUSES.map((s) => (
+                  <option key={s} value={s}>{s}</option>
                 ))}
-              </SelectContent>
-            </Select>
-          </Field>
-        </Row>
-        <div className="mt-3">
-          <Field label="Product Photography Link (clickable in PDF)">
-            <Input
-              placeholder="https://drive.google.com/..."
-              value={value.productLink}
-              onChange={(e) => update({ productLink: e.target.value })}
-            />
-          </Field>
-        </div>
-      </section>
-      )}
-
-      {show(2) && (
-      <section>
-        <h3 className="mb-3 font-display text-lg">4 View CAD Images</h3>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          <ImageField
-            label="Front View"
-            value={value.imageFront}
-            onChange={(v) => update({ imageFront: v })}
-          />
-          <ImageField
-            label="Side View"
-            value={value.imageSide}
-            onChange={(v) => update({ imageSide: v })}
-          />
-          <ImageField
-            label="Top View"
-            value={value.imageTop}
-            onChange={(v) => update({ imageTop: v })}
-          />
-          <ImageField
-            label="Perspective"
-            value={value.imagePerspective}
-            onChange={(v) => update({ imagePerspective: v })}
-          />
-        </div>
-      </section>
-      )}
-
-      {show(2) && (
-      <section>
-        <h3 className="mb-3 font-display text-lg">Jewelry Specifications</h3>
-        <Row>
-          {([
-            ["Jewelry Type", "jewelryType"],
-            ["Metal", "metal"],
-            ["Gross Weight", "grossWeight"],
-            ["Net Gold Weight", "netGoldWeight"],
-            ["Center Stone", "centerStone"],
-            ["Side Diamonds", "sideDiamonds"],
-            ["Total Diamond Weight", "totalDiamondWeight"],
-            ["Diamond Quality", "diamondQuality"],
-            ["Ring Size", "ringSize"],
-            ["Setting Type", "settingType"],
-            ["Polish", "polish"],
-          ] as const).map(([label, key]) => (
-            <Field key={key} label={label}>
-              <Input
-                value={value[key] as string}
-                onChange={(e) =>
-                  update({ [key]: e.target.value } as Partial<Quotation>)
-                }
-              />
+              </select>
             </Field>
-          ))}
-        </Row>
-      </section>
-      )}
+          </div>
 
-      {show(2) && (
-      <section>
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="font-display text-lg">Diamond Breakdown</h3>
-          <Button type="button" size="sm" variant="outline" onClick={addDiamond}>
-            <Plus className="mr-1 h-4 w-4" /> Add row
-          </Button>
-        </div>
-        <div className="space-y-2">
-          {value.diamonds.map((diamond) => (
-            <div key={diamond.id} className="grid grid-cols-12 items-center gap-2">
-              <Input
-                className="col-span-3"
-                placeholder="Shape"
-                value={diamond.shape}
-                onChange={(e) =>
-                  updateDiamond(diamond.id, { shape: e.target.value })
-                }
-              />
-              <Input
-                className="col-span-3"
-                placeholder="Size"
-                value={diamond.size}
-                onChange={(e) =>
-                  updateDiamond(diamond.id, { size: e.target.value })
-                }
-              />
-              <Input
-                className="col-span-2"
-                placeholder="Qty"
-                type="number"
-                value={diamond.qty}
-                onChange={(e) =>
-                  updateDiamond(diamond.id, { qty: Number(e.target.value) })
-                }
-              />
-              <Input
-                className="col-span-3"
-                placeholder="Total Weight (CT)"
-                type="number"
-                step="0.01"
-                value={diamond.totalWeight}
-                onChange={(e) =>
-                  updateDiamond(diamond.id, {
-                    totalWeight: Number(e.target.value),
-                  })
-                }
-              />
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className="col-span-1"
-                onClick={() => removeDiamond(diamond.id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+          <div className="border-t border-slate-100 pt-4">
+            <SectionTitle>Customer Details</SectionTitle>
+            <div className="space-y-3">
+              <Field label="Customer Name" required>
+                <TextInput value={value.customerName} onChange={(v) => update({ customerName: v })} placeholder="e.g. John Smith" />
+              </Field>
+              <Field label="Customer Email">
+                <TextInput value={value.customerEmail} onChange={(v) => update({ customerEmail: v })} placeholder="customer@email.com" type="email" />
+              </Field>
             </div>
-          ))}
-        </div>
-      </section>
-      )}
+          </div>
 
-      {show(3) && (
-      <section>
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="font-display text-lg">Price Breakdown</h3>
-          <Button type="button" size="sm" variant="outline" onClick={addPrice}>
-            <Plus className="mr-1 h-4 w-4" /> Add row
-          </Button>
-        </div>
-        <div className="space-y-2">
-          {value.prices.map((price) => (
-            <div key={price.id} className="grid grid-cols-12 items-center gap-2">
-              <Input
-                className="col-span-7"
-                placeholder="Description"
-                value={price.description}
-                onChange={(e) =>
-                  updatePrice(price.id, { description: e.target.value })
-                }
-              />
-              <Input
-                className="col-span-4"
-                placeholder="Amount"
-                value={price.amount}
-                onChange={(e) =>
-                  updatePrice(price.id, { amount: e.target.value })
-                }
-              />
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className="col-span-1"
-                onClick={() => removePrice(price.id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+          <div className="border-t border-slate-100 pt-4">
+            <SectionTitle>Sales Info</SectionTitle>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Sales Executive">
+                  <TextInput value={value.salesExecutive} onChange={(v) => update({ salesExecutive: v })} placeholder="Your name" />
+                </Field>
+                <Field label="Sales Email">
+                  <TextInput value={value.salesEmail} onChange={(v) => update({ salesEmail: v })} placeholder="sales@email.com" type="email" />
+                </Field>
+              </div>
+              <Field label="Product Photography Link">
+                <TextInput value={value.productLink} onChange={(v) => update({ productLink: v })} placeholder="https://drive.google.com/..." />
+              </Field>
             </div>
-          ))}
-          <Row>
-            <Field label="Total Price">
-              <Input
-                value={value.totalPrice}
-                onChange={(e) => update({ totalPrice: e.target.value })}
-              />
-            </Field>
-            <Field label="Currency">
-              <Input
-                value={value.currency}
-                onChange={(e) => update({ currency: e.target.value })}
-              />
-            </Field>
-          </Row>
+          </div>
         </div>
-      </section>
       )}
 
-      {show(3) && (
-      <section>
-        <h3 className="mb-3 font-display text-lg">Terms & Notes</h3>
-        <Field label="Terms (one per line)">
-          <Textarea
-            rows={6}
-            value={value.terms.join("\n")}
-            onChange={(e) =>
-              update({ terms: e.target.value.split("\n").filter(Boolean) })
-            }
-          />
-        </Field>
-        <div className="mt-3">
-          <Field label="Internal Notes (optional, shown on PDF)">
-            <Textarea
-              rows={3}
-              value={value.notes}
-              onChange={(e) => update({ notes: e.target.value })}
-            />
-          </Field>
+      {/* ── Step 2: Product ── */}
+      {show(2) && (
+        <div className="space-y-6">
+          <div>
+            <SectionTitle>4-View CAD Images</SectionTitle>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <ImageField label="Front" value={value.imageFront} onChange={(v) => update({ imageFront: v })} />
+              <ImageField label="Side" value={value.imageSide} onChange={(v) => update({ imageSide: v })} />
+              <ImageField label="Top" value={value.imageTop} onChange={(v) => update({ imageTop: v })} />
+              <ImageField label="Perspective" value={value.imagePerspective} onChange={(v) => update({ imagePerspective: v })} />
+            </div>
+          </div>
+
+          <div className="border-t border-slate-100 pt-4">
+            <SectionTitle>Jewelry Specifications</SectionTitle>
+            <div className="grid grid-cols-2 gap-3">
+              {([
+                ["Jewelry Type", "jewelryType", "e.g. Engagement Ring"],
+                ["Metal", "metal", "e.g. 14KT White Gold"],
+                ["Gross Weight", "grossWeight", "e.g. 8.25 Grams"],
+                ["Net Gold Weight", "netGoldWeight", "e.g. 7.10 Grams"],
+                ["Center Stone", "centerStone", "e.g. 3.00 CT Emerald Cut"],
+                ["Side Diamonds", "sideDiamonds", "e.g. Round Brilliant"],
+                ["Total Diamond Wt.", "totalDiamondWeight", "e.g. 4.20 CT"],
+                ["Diamond Quality", "diamondQuality", "e.g. F-G / VS"],
+                ["Ring Size", "ringSize", "e.g. US 7"],
+                ["Setting Type", "settingType", "e.g. Hidden Halo"],
+                ["Polish", "polish", "e.g. High Polish"],
+              ] as const).map(([label, key, placeholder]) => (
+                <Field key={key} label={label}>
+                  <TextInput
+                    value={value[key] as string}
+                    onChange={(v) => update({ [key]: v } as Partial<Quotation>)}
+                    placeholder={placeholder}
+                  />
+                </Field>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-slate-100 pt-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-bold text-slate-700">Diamond Breakdown</h3>
+              <button
+                type="button"
+                onClick={addDiamond}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 font-semibold text-sm hover:bg-blue-100 transition"
+              >
+                <Plus className="h-4 w-4" /> Add Row
+              </button>
+            </div>
+            {value.diamonds.length === 0 ? (
+              <p className="text-sm text-slate-400 text-center py-4 bg-slate-50 rounded-xl">No diamond rows yet. Click "Add Row" to add one.</p>
+            ) : (
+              <div className="space-y-2">
+                {/* Header */}
+                <div className="grid grid-cols-12 gap-1.5 px-1">
+                  {["Shape", "Size", "Qty", "Weight (CT)", ""].map((h, i) => (
+                    <p key={i} className={`text-xs font-semibold text-slate-400 uppercase ${i === 0 ? "col-span-3" : i === 1 ? "col-span-3" : i === 2 ? "col-span-2" : i === 3 ? "col-span-3" : "col-span-1"}`}>{h}</p>
+                  ))}
+                </div>
+                {value.diamonds.map((d) => (
+                  <div key={d.id} className="grid grid-cols-12 items-center gap-1.5">
+                    <input className="col-span-3 h-10 px-2.5 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-blue-400 bg-slate-50" placeholder="Round" value={d.shape} onChange={(e) => updateDiamond(d.id, { shape: e.target.value })} />
+                    <input className="col-span-3 h-10 px-2.5 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-blue-400 bg-slate-50" placeholder="1.5mm" value={d.size} onChange={(e) => updateDiamond(d.id, { size: e.target.value })} />
+                    <input className="col-span-2 h-10 px-2 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-blue-400 bg-slate-50 text-center" type="number" value={d.qty} onChange={(e) => updateDiamond(d.id, { qty: Number(e.target.value) })} />
+                    <input className="col-span-3 h-10 px-2.5 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-blue-400 bg-slate-50" type="number" step="0.01" placeholder="0.50" value={d.totalWeight} onChange={(e) => updateDiamond(d.id, { totalWeight: Number(e.target.value) })} />
+                    <button type="button" onClick={() => removeDiamond(d.id)} className="col-span-1 flex items-center justify-center h-10 rounded-xl text-slate-400 hover:bg-red-50 hover:text-red-500 transition">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </section>
+      )}
+
+      {/* ── Step 3: Pricing ── */}
+      {show(3) && (
+        <div className="space-y-6">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-bold text-slate-700">Price Breakdown</h3>
+              <button
+                type="button"
+                onClick={addPrice}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 font-semibold text-sm hover:bg-blue-100 transition"
+              >
+                <Plus className="h-4 w-4" /> Add Row
+              </button>
+            </div>
+            {value.prices.length === 0 ? (
+              <p className="text-sm text-slate-400 text-center py-4 bg-slate-50 rounded-xl">No price rows yet. Click "Add Row" to add one.</p>
+            ) : (
+              <div className="space-y-2">
+                <div className="grid grid-cols-12 gap-1.5 px-1">
+                  <p className="col-span-7 text-xs font-semibold text-slate-400 uppercase">Description</p>
+                  <p className="col-span-4 text-xs font-semibold text-slate-400 uppercase">Amount</p>
+                </div>
+                {value.prices.map((p) => (
+                  <div key={p.id} className="grid grid-cols-12 items-center gap-1.5">
+                    <input className="col-span-7 h-10 px-3 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-blue-400 bg-slate-50" placeholder="e.g. Gold Value" value={p.description} onChange={(e) => updatePrice(p.id, { description: e.target.value })} />
+                    <input className="col-span-4 h-10 px-3 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-blue-400 bg-slate-50" placeholder="$0.00" value={p.amount} onChange={(e) => updatePrice(p.id, { amount: e.target.value })} />
+                    <button type="button" onClick={() => removePrice(p.id)} className="col-span-1 flex items-center justify-center h-10 rounded-xl text-slate-400 hover:bg-red-50 hover:text-red-500 transition">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-4 grid grid-cols-2 gap-3 pt-4 border-t-2 border-slate-100">
+              <Field label="Total Price">
+                <TextInput value={value.totalPrice} onChange={(v) => update({ totalPrice: v })} placeholder="$2,840" />
+              </Field>
+              <Field label="Currency">
+                <TextInput value={value.currency} onChange={(v) => update({ currency: v })} placeholder="USD" />
+              </Field>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-100 pt-4 space-y-4">
+            <SectionTitle>Terms & Notes</SectionTitle>
+            <Field label="Terms & Conditions (one per line)">
+              <textarea
+                rows={6}
+                value={value.terms.join("\n")}
+                onChange={(e) => update({ terms: e.target.value.split("\n").filter(Boolean) })}
+                className="w-full px-3.5 py-3 rounded-xl border-2 border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-blue-400 transition bg-slate-50 resize-none"
+                placeholder={"Production Time: 10–14 Business Days\nIGI Certification Included\n50% Advance Required"}
+              />
+            </Field>
+            <Field label="Internal Notes (optional, shown on PDF)">
+              <textarea
+                rows={3}
+                value={value.notes}
+                onChange={(e) => update({ notes: e.target.value })}
+                className="w-full px-3.5 py-3 rounded-xl border-2 border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-blue-400 transition bg-slate-50 resize-none"
+                placeholder="Any special notes for this quotation..."
+              />
+            </Field>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { QuotationForm } from "./QuotationForm";
 import { QuotationSheet } from "./QuotationSheet";
 import { upsert, type Quotation } from "@/lib/quotations";
@@ -10,28 +8,41 @@ import { toast } from "sonner";
 import { isAuthed } from "@/lib/auth";
 import { getClient } from "@/lib/clients";
 import { AppHeader } from "./AppHeader";
+import {
+  ArrowLeft,
+  Save,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  User,
+  Gem,
+  DollarSign,
+} from "lucide-react";
+
+const STEPS = [
+  { n: 1 as const, label: "Customer",  hint: "Who is this quote for?",       icon: User },
+  { n: 2 as const, label: "Product",   hint: "CAD images & specifications",  icon: Gem },
+  { n: 3 as const, label: "Pricing",   hint: "Prices, terms & final review", icon: DollarSign },
+];
 
 export function QuotationEditor({ initial }: { initial: Quotation }) {
   const navigate = useNavigate();
   const [q, setQ] = useState<Quotation>(initial);
   const [busy, setBusy] = useState(false);
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [showPreview, setShowPreview] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isAuthed()) navigate({ to: "/login" });
   }, [navigate]);
 
-  // Auto-save 800ms after the last edit so the user never loses work.
   useEffect(() => {
     const t = setTimeout(() => upsert(q), 800);
     return () => clearTimeout(t);
   }, [q]);
 
-  const save = () => {
-    upsert(q);
-    toast.success("Quotation saved");
-  };
+  const save = () => { upsert(q); toast.success("Saved!"); };
 
   const download = async () => {
     if (!sheetRef.current) return;
@@ -39,9 +50,8 @@ export function QuotationEditor({ initial }: { initial: Quotation }) {
     upsert(q);
     try {
       await exportElementToPDF(sheetRef.current, `${q.quoteNo}-${q.customerName || "quotation"}.pdf`);
-      toast.success("PDF downloaded");
-    } catch (e) {
-      console.error(e);
+      toast.success("PDF downloaded!");
+    } catch {
       toast.error("Failed to generate PDF");
     } finally {
       setBusy(false);
@@ -49,131 +59,157 @@ export function QuotationEditor({ initial }: { initial: Quotation }) {
   };
 
   const client = q.clientId ? getClient(q.clientId) : undefined;
-
-  const steps: { n: 1 | 2 | 3; label: string; hint: string }[] = [
-    { n: 1, label: "1. Customer", hint: "Who is this quote for" },
-    { n: 2, label: "2. Product", hint: "CAD images & specifications" },
-    { n: 3, label: "3. Pricing", hint: "Price breakdown & terms" },
-  ];
+  const currentStep = STEPS.find((s) => s.n === step)!;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-slate-50">
+      {/* Header */}
       <AppHeader
         sticky
         portalLabel="Quotation Builder"
-        containerClassName="py-3"
         leftSlot={
           <Link
             to={client ? "/clients/$id" : "/"}
             params={client ? { id: client.id } : undefined as never}
           >
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-primary/80 hover:bg-primary/8 hover:text-primary"
-            >
-              <ArrowLeft className="mr-1 h-4 w-4" />
-              {client ? client.name || "Client" : "Clients"}
-            </Button>
+            <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-100 transition text-sm font-medium">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">{client ? client.name || "Client" : "Clients"}</span>
+              <span className="sm:hidden">Back</span>
+            </button>
           </Link>
         }
         rightSlot={
-          <>
-            <div className="hidden items-center gap-2 md:flex">
-              <span className="font-display text-base text-primary/78">
-                {q.quoteNo}
-              </span>
-              <span className="rounded-full bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary/80">
-                {q.status}
-              </span>
-            </div>
-            <Button
-              size="sm"
-              variant="outline"
-              className="border-primary/20 bg-white/70 text-primary hover:bg-primary/8 hover:text-primary"
+          <div className="flex items-center gap-2">
+            <span className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 text-sm font-semibold text-slate-600">
+              {q.quoteNo}
+            </span>
+            <button
               onClick={save}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border-2 border-slate-200 text-slate-600 hover:bg-slate-50 transition text-sm font-semibold"
             >
-              <Save className="mr-2 h-4 w-4" /> Save
-            </Button>
-            <Button
-              size="sm"
-              className="gold-gradient text-white hover:opacity-90"
+              <Save className="h-4 w-4" />
+              <span className="hidden sm:inline">Save</span>
+            </button>
+            <button
               onClick={download}
               disabled={busy}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-white font-bold text-sm transition disabled:opacity-60"
+              style={{ background: "linear-gradient(135deg, #2563eb 0%, #1a3a7a 100%)" }}
             >
-              <Download className="mr-2 h-4 w-4" />{" "}
-              {busy ? "Generating..." : "Download PDF"}
-            </Button>
-          </>
+              <Download className="h-4 w-4" />
+              <span>{busy ? "Generating..." : "Download PDF"}</span>
+            </button>
+          </div>
         }
       />
 
-      <div className="app-shell-wide grid gap-8 py-8 lg:grid-cols-[480px_1fr]">
-        <div className="space-y-4">
-          {/* Step tabs */}
-          <div className="flex gap-2 rounded-full border border-border bg-card p-1">
-            {steps.map((s) => (
-              <button
-                key={s.n}
-                type="button"
-                onClick={() => setStep(s.n)}
-                className={`flex-1 rounded-full px-3 py-2 text-xs font-medium transition ${
-                  step === s.n
-                    ? "gold-gradient text-white shadow-sm"
-                    : "text-muted-foreground hover:bg-primary/5 hover:text-foreground"
-                }`}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-          <p className="px-1 text-xs text-muted-foreground">
-            {steps.find((s) => s.n === step)?.hint} · auto-saved
-          </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        <div className="grid gap-6 lg:grid-cols-[520px_1fr]">
 
-          <div className="rounded-xl border border-border bg-card p-6">
-            <QuotationForm value={q} onChange={setQ} step={step} />
+          {/* Left: Form Panel */}
+          <div className="space-y-4">
 
-            <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={step === 1}
-                onClick={() => setStep((step - 1) as 1 | 2 | 3)}
-              >
-                <ChevronLeft className="mr-1 h-4 w-4" /> Back
-              </Button>
-              {step < 3 ? (
-                <Button
-                  size="sm"
-                  className="gold-gradient text-white"
-                  onClick={() => setStep((step + 1) as 1 | 2 | 3)}
+            {/* Step Indicator */}
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+              <div className="flex items-center gap-2">
+                {STEPS.map((s, i) => {
+                  const Icon = s.icon;
+                  const isActive = s.n === step;
+                  const isDone = s.n < step;
+                  return (
+                    <div key={s.n} className="flex items-center flex-1">
+                      <button
+                        onClick={() => setStep(s.n)}
+                        className={`flex items-center gap-2 flex-1 rounded-xl px-3 py-2.5 transition text-sm font-semibold ${
+                          isActive
+                            ? "text-white shadow-sm"
+                            : isDone
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-slate-50 text-slate-400 hover:bg-slate-100"
+                        }`}
+                        style={isActive ? { background: "linear-gradient(135deg, #2563eb 0%, #1a3a7a 100%)" } : {}}
+                      >
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                          isActive ? "bg-white/20" : isDone ? "bg-emerald-200 text-emerald-800" : "bg-slate-200 text-slate-500"
+                        }`}>
+                          {isDone ? "✓" : s.n}
+                        </div>
+                        <span className="hidden sm:inline">{s.label}</span>
+                        <Icon className="h-3.5 w-3.5 sm:hidden" />
+                      </button>
+                      {i < STEPS.length - 1 && (
+                        <div className={`w-3 h-0.5 mx-1 rounded-full ${isDone ? "bg-emerald-300" : "bg-slate-200"}`} />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-slate-400 mt-2 px-1">
+                <span className="font-medium text-slate-600">{currentStep.label}:</span> {currentStep.hint}
+                <span className="ml-2 text-slate-300">· Auto-saved</span>
+              </p>
+            </div>
+
+            {/* Form */}
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+              <QuotationForm value={q} onChange={setQ} step={step} />
+
+              {/* Navigation */}
+              <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
+                <button
+                  disabled={step === 1}
+                  onClick={() => setStep((step - 1) as 1 | 2 | 3)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 font-semibold text-sm disabled:opacity-40 hover:bg-slate-50 transition"
                 >
-                  Next <ChevronRight className="ml-1 h-4 w-4" />
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  className="gold-gradient text-white"
-                  onClick={download}
-                  disabled={busy}
-                >
-                  <Download className="mr-1 h-4 w-4" />
-                  {busy ? "Generating..." : "Download PDF"}
-                </Button>
-              )}
+                  <ChevronLeft className="h-4 w-4" /> Back
+                </button>
+                {step < 3 ? (
+                  <button
+                    onClick={() => setStep((step + 1) as 1 | 2 | 3)}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white font-bold text-sm transition"
+                    style={{ background: "linear-gradient(135deg, #2563eb 0%, #1a3a7a 100%)" }}
+                  >
+                    Next <ChevronRight className="h-4 w-4" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={download}
+                    disabled={busy}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white font-bold text-sm transition disabled:opacity-60"
+                    style={{ background: "linear-gradient(135deg, #16a34a 0%, #15803d 100%)" }}
+                  >
+                    <Download className="h-4 w-4" />
+                    {busy ? "Generating..." : "Download PDF"}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Mobile Preview Toggle */}
+            <button
+              onClick={() => setShowPreview(!showPreview)}
+              className="lg:hidden w-full py-3 rounded-2xl border-2 border-blue-200 text-blue-700 font-semibold text-sm bg-blue-50 hover:bg-blue-100 transition"
+            >
+              {showPreview ? "Hide Preview" : "Show PDF Preview"}
+            </button>
+          </div>
+
+          {/* Right: Preview */}
+          <div className={`${showPreview ? "block" : "hidden"} lg:block`}>
+            <div className="sticky top-20">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs uppercase tracking-widest text-slate-400 font-semibold">Live PDF Preview</p>
+                <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-lg font-medium">{q.quoteNo}</span>
+              </div>
+              <div className="overflow-x-auto rounded-2xl shadow-lg">
+                <div className="origin-top-left scale-[0.75] sm:scale-[0.82] 2xl:scale-[0.92]" style={{ width: `${100 / 0.82}%` }}>
+                  <QuotationSheet q={q} innerRef={sheetRef} />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="overflow-x-auto">
-          <div className="sticky top-20">
-            <div className="mb-3 text-xs uppercase tracking-[0.25em] text-muted-foreground">
-              Live Preview
-            </div>
-            <div className="origin-top-left scale-[0.82] 2xl:scale-[0.92]">
-              <QuotationSheet q={q} innerRef={sheetRef} />
-            </div>
-          </div>
+
         </div>
       </div>
     </div>

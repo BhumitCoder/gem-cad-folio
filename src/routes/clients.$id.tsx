@@ -1,18 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-
 import { AppHeader } from "@/components/AppHeader";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { isAuthed } from "@/lib/auth";
 import { useDataRefresh } from "@/hooks/useDataRefresh";
 import { getClient, upsertClient, type Client } from "@/lib/clients";
@@ -26,16 +14,17 @@ import {
 } from "@/lib/quotations";
 import {
   ArrowLeft,
-  Building2,
+  Plus,
   Eye,
+  Trash2,
   FileText,
+  Phone,
   Mail,
   MapPin,
-  Phone,
-  Plus,
-  Save,
-  Sparkles,
-  Trash2,
+  Building2,
+  Edit2,
+  Check,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -43,12 +32,12 @@ export const Route = createFileRoute("/clients/$id")({
   component: ClientDetail,
 });
 
-const STATUS_STYLE: Record<QuotationStatus, string> = {
-  Draft: "bg-muted text-muted-foreground",
-  Sent: "bg-primary/10 text-primary",
-  "Needs Changes": "bg-amber-500/15 text-amber-700",
-  Approved: "bg-emerald-500/15 text-emerald-700",
-  Completed: "bg-ink text-white",
+const STATUS_COLORS: Record<QuotationStatus, { bg: string; text: string; dot: string }> = {
+  Draft:          { bg: "bg-slate-100",   text: "text-slate-600",   dot: "bg-slate-400" },
+  Sent:           { bg: "bg-blue-100",    text: "text-blue-700",    dot: "bg-blue-500" },
+  "Needs Changes":{ bg: "bg-amber-100",   text: "text-amber-700",   dot: "bg-amber-500" },
+  Approved:       { bg: "bg-emerald-100", text: "text-emerald-700", dot: "bg-emerald-500" },
+  Completed:      { bg: "bg-slate-800",   text: "text-white",       dot: "bg-white" },
 };
 
 function ClientDetail() {
@@ -60,14 +49,11 @@ function ClientDetail() {
   const [editing, setEditing] = useState(false);
 
   useEffect(() => {
-    if (!isAuthed()) {
-      navigate({ to: "/login" });
-      return;
-    }
+    if (!isAuthed()) { navigate({ to: "/login" }); return; }
     const refresh = () => {
-      const currentClient = getClient(id);
-      if (!currentClient) return;
-      setClient(currentClient);
+      const c = getClient(id);
+      if (!c) return;
+      setClient(c);
       setQuotes(listByClient(id));
     };
     refresh();
@@ -80,430 +66,318 @@ function ClientDetail() {
     [quotes],
   );
 
-  const statusSummary = useMemo(
-    () =>
-      QUOTATION_STATUSES.map((status) => ({
-        status,
-        count: quotes.filter((quote) => quote.status === status).length,
-      })),
-    [quotes],
-  );
-
   if (!client) return null;
 
-  const updateField = (patch: Partial<Client>) => {
-    setClient({ ...client, ...patch });
-  };
+  const update = (patch: Partial<Client>) => setClient({ ...client, ...patch });
 
-  const saveClient = () => {
+  const save = () => {
     upsertClient(client);
     toast.success("Client updated");
     setEditing(false);
   };
 
-  const setStatus = (quoteId: string, status: QuotationStatus) => {
-    const quote = quotes.find((item) => item.id === quoteId);
-    if (!quote) return;
-
-    upsert({ ...quote, status });
-    setQuotes(listByClient(id));
-    toast.success(`Status: ${status}`);
+  const cancel = () => {
+    setClient(getClient(id)!);
+    setEditing(false);
   };
 
+  const setStatus = (quoteId: string, status: QuotationStatus) => {
+    const q = quotes.find((x) => x.id === quoteId);
+    if (!q) return;
+    upsert({ ...q, status });
+    setQuotes(listByClient(id));
+    toast.success(`Status updated to ${status}`);
+  };
+
+  const initials = client.name
+    .split(" ")
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase() || "?";
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-slate-50">
       <AppHeader
-        portalLabel="Client Workspace"
+        portalLabel="Client Details"
         leftSlot={
           <Link to="/">
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-primary/80 hover:bg-primary/8 hover:text-primary"
-            >
-              <ArrowLeft className="mr-1 h-4 w-4" /> Clients
-            </Button>
+            <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-100 transition text-sm font-medium">
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back</span>
+            </button>
           </Link>
         }
       />
 
-      <main className="app-shell py-8 sm:py-10">
-        <section className="relative overflow-hidden rounded-[32px] border border-primary/10 bg-white px-6 py-7 shadow-[0_30px_80px_rgba(30,74,150,0.08)] sm:px-8">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(67,110,191,0.15),transparent_34%),radial-gradient(circle_at_85%_22%,rgba(67,110,191,0.12),transparent_25%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(241,247,255,0.94))]" />
-          <div className="relative flex flex-col gap-8 xl:flex-row xl:items-end xl:justify-between">
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/10 bg-white/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-primary/70">
-                <Sparkles className="h-3.5 w-3.5" />
-                Client Workspace
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-5">
+
+        {/* Client Profile Card */}
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 sm:p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div
+                className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-xl shrink-0"
+                style={{ background: "linear-gradient(135deg, #2563eb 0%, #1a3a7a 100%)" }}
+              >
+                {initials}
               </div>
-              <h1 className="mt-5 font-display text-5xl leading-none text-foreground sm:text-6xl">
-                {client.name}
-              </h1>
-              <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-                All quotations for {client.name}. Create a new one or open an existing draft.
-              </p>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3 xl:min-w-[420px]">
-              <HeroStat
-                label="Total Quotations"
-                value={quotes.length}
-                detail="All records for this client"
-              />
-              <HeroStat
-                label="Active Statuses"
-                value={statusSummary.filter((item) => item.count > 0).length}
-                detail="Distinct progress stages"
-              />
-              <HeroStat
-                label="Latest Quote"
-                value={sorted[0]?.quoteNo ?? "—"}
-                detail="Most recently updated quotation"
-                compact
-              />
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-6 grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
-          <aside className="xl:sticky xl:top-24 xl:self-start">
-            <div className="rounded-[28px] border border-primary/10 bg-white p-6 shadow-[0_24px_60px_rgba(30,74,150,0.06)]">
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl gold-gradient text-base font-semibold text-white shadow-sm">
-                  {client.name
-                    .split(" ")
-                    .map((part) => part[0])
-                    .slice(0, 2)
-                    .join("")
-                    .toUpperCase() || "?"}
-                </div>
-                <div>
-                  <h2 className="font-display text-3xl leading-none text-foreground">
-                    {client.name || "—"}
-                  </h2>
-                  <p className="mt-1 text-xs uppercase tracking-[0.24em] text-primary/60">
-                    {client.company || client.country || "Private Client"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-6 grid gap-3 rounded-2xl border border-primary/8 bg-[linear-gradient(180deg,#ffffff,#f7faff)] p-4">
-                <ContactRow icon={Mail} value={client.email || "No email added"} />
-                <ContactRow icon={Phone} value={client.phone || "No phone added"} />
-                <ContactRow
-                  icon={Building2}
-                  value={client.company || "No company added"}
-                />
-                <ContactRow
-                  icon={MapPin}
-                  value={client.country || "No country added"}
-                />
-              </div>
-
-              {client.notes && !editing ? (
-                <div className="mt-4 rounded-2xl bg-primary/[0.04] p-4">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-primary/65">
-                    Notes
-                  </p>
-                  <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
-                    {client.notes}
-                  </p>
-                </div>
-              ) : null}
-
-              <div className="mt-5">
-                {!editing ? (
-                  <Button
-                    variant="outline"
-                    className="w-full rounded-full border-primary/15"
-                    onClick={() => setEditing(true)}
-                  >
-                    Edit Client
-                  </Button>
+              <div>
+                {editing ? (
+                  <input
+                    value={client.name}
+                    onChange={(e) => update({ name: e.target.value })}
+                    className="text-xl font-bold text-slate-800 border-b-2 border-blue-400 focus:outline-none bg-transparent w-full"
+                  />
                 ) : (
-                  <div className="space-y-3">
-                    <Field label="Name">
-                      <Input
-                        value={client.name}
-                        onChange={(e) => updateField({ name: e.target.value })}
-                      />
-                    </Field>
-                    <Field label="Email">
-                      <Input
-                        value={client.email}
-                        onChange={(e) => updateField({ email: e.target.value })}
-                      />
-                    </Field>
-                    <Field label="Phone">
-                      <Input
-                        value={client.phone}
-                        onChange={(e) => updateField({ phone: e.target.value })}
-                      />
-                    </Field>
-                    <Field label="Company">
-                      <Input
-                        value={client.company}
-                        onChange={(e) => updateField({ company: e.target.value })}
-                      />
-                    </Field>
-                    <Field label="Country">
-                      <Input
-                        value={client.country}
-                        onChange={(e) => updateField({ country: e.target.value })}
-                      />
-                    </Field>
-                    <Field label="Notes">
-                      <Textarea
-                        rows={3}
-                        value={client.notes}
-                        onChange={(e) => updateField({ notes: e.target.value })}
-                      />
-                    </Field>
-                    <div className="flex gap-2">
-                      <Button
-                        className="gold-gradient flex-1 text-white"
-                        onClick={saveClient}
-                      >
-                        <Save className="mr-1 h-4 w-4" /> Save
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setClient(getClient(id)!);
-                          setEditing(false);
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
+                  <h1 className="text-xl font-bold text-slate-800">{client.name}</h1>
                 )}
+                <p className="text-sm text-slate-500 mt-0.5">{client.company || client.country || "Private Client"}</p>
               </div>
             </div>
-          </aside>
+            {!editing ? (
+              <button
+                onClick={() => setEditing(true)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition text-sm font-medium"
+              >
+                <Edit2 className="h-4 w-4" /> Edit
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <button onClick={save} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600 transition">
+                  <Check className="h-4 w-4" /> Save
+                </button>
+                <button onClick={cancel} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm hover:bg-slate-50 transition">
+                  <X className="h-4 w-4" /> Cancel
+                </button>
+              </div>
+            )}
+          </div>
 
-          <section className="space-y-5">
-            <div className="grid gap-4 md:grid-cols-5">
-              {statusSummary.map((item) => (
-                <div
-                  key={item.status}
-                  className="rounded-2xl border border-primary/10 bg-white p-4 shadow-[0_16px_40px_rgba(30,74,150,0.05)]"
-                >
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-primary/60">
-                    {item.status}
-                  </p>
-                  <p className="mt-3 font-display text-4xl leading-none text-foreground">
-                    {item.count}
-                  </p>
+          {/* Contact Info */}
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {editing ? (
+              <>
+                <ContactEditField icon={Mail} label="Email" value={client.email} onChange={(v) => update({ email: v })} type="email" />
+                <ContactEditField icon={Phone} label="Phone" value={client.phone} onChange={(v) => update({ phone: v })} type="tel" />
+                <ContactEditField icon={Building2} label="Company" value={client.company} onChange={(v) => update({ company: v })} />
+                <ContactEditField icon={MapPin} label="Country" value={client.country} onChange={(v) => update({ country: v })} />
+              </>
+            ) : (
+              <>
+                {client.email && <ContactRow icon={Mail} value={client.email} />}
+                {client.phone && <ContactRow icon={Phone} value={client.phone} />}
+                {client.company && <ContactRow icon={Building2} value={client.company} />}
+                {client.country && <ContactRow icon={MapPin} value={client.country} />}
+              </>
+            )}
+          </div>
+
+          {editing && (
+            <div className="mt-3">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Notes</label>
+              <textarea
+                rows={2}
+                value={client.notes}
+                onChange={(e) => update({ notes: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 text-slate-700 text-sm focus:outline-none focus:border-blue-400 resize-none bg-slate-50"
+              />
+            </div>
+          )}
+
+          {client.notes && !editing && (
+            <div className="mt-3 bg-slate-50 rounded-xl p-3 text-sm text-slate-600 border border-slate-100">
+              {client.notes}
+            </div>
+          )}
+
+          {/* New Quotation CTA */}
+          <div className="mt-5 pt-5 border-t border-slate-100">
+            <Link
+              to="/quotation/new"
+              search={{ clientId: id }}
+              className="flex items-center justify-center gap-2 w-full sm:w-auto sm:inline-flex px-6 py-3.5 rounded-xl text-white font-bold text-base transition"
+              style={{ background: "linear-gradient(135deg, #2563eb 0%, #1a3a7a 100%)" }}
+            >
+              <Plus className="h-5 w-5" />
+              Create New Quotation
+            </Link>
+          </div>
+        </div>
+
+        {/* Status Summary */}
+        <div className="grid grid-cols-5 gap-2">
+          {QUOTATION_STATUSES.map((status) => {
+            const count = quotes.filter((q) => q.status === status).length;
+            const { bg, text, dot } = STATUS_COLORS[status];
+            return (
+              <div key={status} className={`${bg} rounded-xl p-3 text-center`}>
+                <p className={`text-xl font-bold ${text}`}>{count}</p>
+                <div className="flex items-center justify-center gap-1 mt-1">
+                  <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />
+                  <p className={`text-[10px] font-semibold ${text} leading-tight hidden sm:block`}>{status}</p>
                 </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Quotations List */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-bold text-slate-800">
+              Quotations <span className="text-slate-400 font-normal text-base">({sorted.length})</span>
+            </h2>
+          </div>
+
+          {sorted.length === 0 ? (
+            <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center">
+              <FileText className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-slate-700 mb-1">No quotations yet</h3>
+              <p className="text-sm text-slate-400 mb-6">Create the first quotation for this client.</p>
+              <Link
+                to="/quotation/new"
+                search={{ clientId: id }}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-white text-sm"
+                style={{ background: "linear-gradient(135deg, #2563eb 0%, #1a3a7a 100%)" }}
+              >
+                <Plus className="h-4 w-4" />
+                Create Quotation
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {sorted.map((quote) => (
+                <QuoteCard
+                  key={quote.id}
+                  quote={quote}
+                  onStatusChange={(s) => setStatus(quote.id, s)}
+                  onDelete={() => {
+                    if (confirm(`Delete "${quote.quoteNo}"? This cannot be undone.`)) {
+                      remove(quote.id);
+                      setQuotes(listByClient(id));
+                      toast.success("Quotation deleted");
+                    }
+                  }}
+                />
               ))}
             </div>
-
-            <div className="rounded-[28px] border border-primary/10 bg-white p-5 shadow-[0_24px_60px_rgba(30,74,150,0.06)]">
-              <div className="flex flex-col gap-4 border-b border-primary/10 pb-4 lg:flex-row lg:items-end lg:justify-between">
-                <div>
-                  <h2 className="font-display text-3xl text-foreground">
-                    Quotations
-                  </h2>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    This list stays scrollable so large quotation histories remain easy
-                    to manage.
-                  </p>
-                </div>
-                <Link to="/quotation/new" search={{ clientId: id }}>
-                  <Button className="gold-gradient rounded-full px-5 text-white hover:opacity-90">
-                    <Plus className="mr-2 h-4 w-4" /> New Quotation
-                  </Button>
-                </Link>
-              </div>
-
-              {sorted.length === 0 ? (
-                <div className="mt-5 rounded-[24px] border border-dashed border-primary/15 bg-[linear-gradient(180deg,rgba(245,249,255,0.96),rgba(255,255,255,0.92))] p-16 text-center">
-                  <FileText className="mx-auto h-12 w-12 text-primary/55" />
-                  <h3 className="mt-5 font-display text-3xl text-foreground">
-                    No quotations yet
-                  </h3>
-                  <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-                    Create the first quotation for this client and it will appear in
-                    this scrollable timeline.
-                  </p>
-                </div>
-              ) : (
-                <div className="mt-5 max-h-[calc(100vh-21rem)] space-y-3 overflow-y-auto pr-1">
-                  {sorted.map((quote) => {
-                    const thumb =
-                      quote.imageFront ||
-                      quote.imagePerspective ||
-                      quote.imageSide ||
-                      quote.imageTop;
-
-                    return (
-                      <div
-                        key={quote.id}
-                        className="rounded-[24px] border border-primary/10 bg-[linear-gradient(180deg,#ffffff,#f7faff)] p-4 shadow-[0_14px_35px_rgba(30,74,150,0.05)]"
-                      >
-                        <div className="flex flex-col gap-4 xl:flex-row xl:items-center">
-                          <div className="flex items-center gap-4">
-                            <div className="flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary/[0.06]">
-                              {thumb ? (
-                                <img
-                                  src={thumb}
-                                  alt={quote.quoteNo}
-                                  className="h-full w-full object-cover"
-                                />
-                              ) : (
-                                <FileText className="h-6 w-6 text-primary/45" />
-                              )}
-                            </div>
-                            <div>
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span className="font-display text-2xl text-foreground">
-                                  {quote.quoteNo}
-                                </span>
-                                <span
-                                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${STATUS_STYLE[quote.status]}`}
-                                >
-                                  {quote.status}
-                                </span>
-                              </div>
-                              <p className="mt-1 text-sm text-muted-foreground">
-                                {quote.jewelryType} · {quote.date}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="grid flex-1 gap-3 md:grid-cols-3 xl:ml-auto xl:max-w-[560px]">
-                            <QuoteMetric label="Value" value={quote.totalPrice} />
-                            <QuoteMetric label="Currency" value={quote.currency} />
-                            <QuoteMetric label="Validity" value={quote.validity} />
-                          </div>
-                        </div>
-
-                        <div className="mt-4 flex flex-col gap-3 border-t border-primary/10 pt-4 xl:flex-row xl:items-center xl:justify-between">
-                          <Select
-                            value={quote.status}
-                            onValueChange={(value) =>
-                              setStatus(quote.id, value as QuotationStatus)
-                            }
-                          >
-                            <SelectTrigger className="w-full rounded-full border-primary/12 bg-white md:w-[220px]">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {QUOTATION_STATUSES.map((status) => (
-                                <SelectItem key={status} value={status}>
-                                  {status}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-
-                          <div className="flex flex-wrap gap-2">
-                            <Link to="/quotation/$id" params={{ id: quote.id }}>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="rounded-full border-primary/15"
-                              >
-                                <Eye className="mr-1 h-4 w-4" /> Open
-                              </Button>
-                            </Link>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="rounded-full text-muted-foreground hover:bg-destructive/8 hover:text-destructive"
-                              onClick={() => {
-                                if (confirm(`Permanently delete ${quote.quoteNo}?`)) {
-                                  remove(quote.id);
-                                  setQuotes(listByClient(id));
-                                  toast.success("Quotation deleted");
-                                }
-                              }}
-                            >
-                              <Trash2 className="mr-1 h-4 w-4" /> Delete
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </section>
+          )}
         </section>
       </main>
     </div>
   );
 }
 
-function HeroStat({
-  label,
-  value,
-  detail,
-  compact = false,
-}: {
-  label: string;
-  value: number | string;
-  detail: string;
-  compact?: boolean;
-}) {
+function ContactRow({ icon: Icon, value }: { icon: typeof Mail; value: string }) {
   return (
-    <div className="rounded-2xl border border-primary/10 bg-white/88 p-4 shadow-sm backdrop-blur">
-      <p className="text-[11px] uppercase tracking-[0.22em] text-primary/65">
-        {label}
-      </p>
-      <p
-        className={`mt-3 font-display leading-none text-foreground ${compact ? "text-2xl" : "text-4xl"}`}
-      >
-        {value}
-      </p>
-      <p className="mt-2 text-sm text-muted-foreground">{detail}</p>
-    </div>
-  );
-}
-
-function ContactRow({
-  icon: Icon,
-  value,
-}: {
-  icon: typeof Mail;
-  value: string;
-}) {
-  return (
-    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/[0.06] text-primary/70">
-        <Icon className="h-4 w-4" />
-      </div>
+    <div className="flex items-center gap-2.5 text-sm text-slate-600 bg-slate-50 rounded-xl px-3 py-2.5">
+      <Icon className="h-4 w-4 text-slate-400 shrink-0" />
       <span className="truncate">{value}</span>
     </div>
   );
 }
 
-function QuoteMetric({ label, value }: { label: string; value: string }) {
+function ContactEditField({
+  icon: Icon,
+  label,
+  value,
+  onChange,
+  type = "text",
+}: {
+  icon: typeof Mail;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+}) {
   return (
-    <div className="rounded-2xl border border-primary/8 bg-white/90 px-4 py-3">
-      <p className="text-[10px] uppercase tracking-[0.2em] text-primary/60">
-        {label}
-      </p>
-      <p className="mt-1 font-medium text-foreground">{value}</p>
+    <div className="relative">
+      <Icon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+      <input
+        type={type}
+        placeholder={label}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full h-10 pl-9 pr-3 rounded-xl border-2 border-slate-200 text-slate-700 text-sm focus:outline-none focus:border-blue-400 bg-slate-50"
+      />
     </div>
   );
 }
 
-function Field({
-  label,
-  children,
+function QuoteCard({
+  quote,
+  onStatusChange,
+  onDelete,
 }: {
-  label: string;
-  children: React.ReactNode;
+  quote: Quotation;
+  onStatusChange: (s: QuotationStatus) => void;
+  onDelete: () => void;
 }) {
+  const { bg, text, dot } = STATUS_COLORS[quote.status];
+  const thumb = quote.imageFront || quote.imagePerspective || quote.imageSide || quote.imageTop;
+
   return (
-    <div>
-      <Label className="mb-1.5 block text-xs uppercase tracking-wider text-muted-foreground">
-        {label}
-      </Label>
-      {children}
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className="p-4 flex items-start gap-4">
+        {/* Thumbnail */}
+        <div className="w-16 h-16 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 overflow-hidden border border-slate-200">
+          {thumb ? (
+            <img src={thumb} alt={quote.quoteNo} className="w-full h-full object-cover" />
+          ) : (
+            <FileText className="h-6 w-6 text-slate-400" />
+          )}
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2 flex-wrap">
+            <div>
+              <p className="font-bold text-slate-800 text-base">{quote.quoteNo}</p>
+              <p className="text-sm text-slate-500 mt-0.5">{quote.jewelryType} · {quote.date}</p>
+            </div>
+            <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${bg} ${text}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />
+              {quote.status}
+            </span>
+          </div>
+
+          {quote.totalPrice && (
+            <p className="mt-2 text-sm font-semibold text-slate-700">{quote.totalPrice} <span className="text-slate-400 font-normal">{quote.currency}</span></p>
+          )}
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="border-t border-slate-100 px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
+        {/* Status Selector */}
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-slate-400 font-medium">Status:</span>
+          <select
+            value={quote.status}
+            onChange={(e) => onStatusChange(e.target.value as QuotationStatus)}
+            className="text-xs font-semibold rounded-lg border border-slate-200 px-2 py-1 text-slate-700 focus:outline-none focus:border-blue-400 bg-white cursor-pointer"
+          >
+            {QUOTATION_STATUSES.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Link to="/quotation/$id" params={{ id: quote.id }}>
+            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 font-semibold text-sm hover:bg-blue-100 transition">
+              <Eye className="h-4 w-4" /> Open
+            </button>
+          </Link>
+          <button
+            onClick={onDelete}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition text-sm"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
