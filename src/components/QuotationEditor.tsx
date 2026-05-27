@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Download } from "lucide-react";
+import { ArrowLeft, Save, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { QuotationForm } from "./QuotationForm";
 import { QuotationSheet } from "./QuotationSheet";
 import { upsert, type Quotation } from "@/lib/quotations";
@@ -15,11 +15,18 @@ export function QuotationEditor({ initial }: { initial: Quotation }) {
   const navigate = useNavigate();
   const [q, setQ] = useState<Quotation>(initial);
   const [busy, setBusy] = useState(false);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const sheetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isAuthed()) navigate({ to: "/login" });
   }, [navigate]);
+
+  // Auto-save 800ms after the last edit so the user never loses work.
+  useEffect(() => {
+    const t = setTimeout(() => upsert(q), 800);
+    return () => clearTimeout(t);
+  }, [q]);
 
   const save = () => {
     upsert(q);
@@ -42,6 +49,12 @@ export function QuotationEditor({ initial }: { initial: Quotation }) {
   };
 
   const client = q.clientId ? getClient(q.clientId) : undefined;
+
+  const steps: { n: 1 | 2 | 3; label: string; hint: string }[] = [
+    { n: 1, label: "1. Customer", hint: "Who is this quote for" },
+    { n: 2, label: "2. Product", hint: "CAD images & specifications" },
+    { n: 3, label: "3. Pricing", hint: "Price breakdown & terms" },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -96,8 +109,61 @@ export function QuotationEditor({ initial }: { initial: Quotation }) {
       />
 
       <div className="app-shell-wide grid gap-8 py-8 lg:grid-cols-[480px_1fr]">
-        <div className="rounded-xl border border-border bg-card p-6">
-          <QuotationForm value={q} onChange={setQ} />
+        <div className="space-y-4">
+          {/* Step tabs */}
+          <div className="flex gap-2 rounded-full border border-border bg-card p-1">
+            {steps.map((s) => (
+              <button
+                key={s.n}
+                type="button"
+                onClick={() => setStep(s.n)}
+                className={`flex-1 rounded-full px-3 py-2 text-xs font-medium transition ${
+                  step === s.n
+                    ? "gold-gradient text-white shadow-sm"
+                    : "text-muted-foreground hover:bg-primary/5 hover:text-foreground"
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+          <p className="px-1 text-xs text-muted-foreground">
+            {steps.find((s) => s.n === step)?.hint} · auto-saved
+          </p>
+
+          <div className="rounded-xl border border-border bg-card p-6">
+            <QuotationForm value={q} onChange={setQ} step={step} />
+
+            <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={step === 1}
+                onClick={() => setStep((step - 1) as 1 | 2 | 3)}
+              >
+                <ChevronLeft className="mr-1 h-4 w-4" /> Back
+              </Button>
+              {step < 3 ? (
+                <Button
+                  size="sm"
+                  className="gold-gradient text-white"
+                  onClick={() => setStep((step + 1) as 1 | 2 | 3)}
+                >
+                  Next <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  className="gold-gradient text-white"
+                  onClick={download}
+                  disabled={busy}
+                >
+                  <Download className="mr-1 h-4 w-4" />
+                  {busy ? "Generating..." : "Download PDF"}
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <div className="sticky top-20">
