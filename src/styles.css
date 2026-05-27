@@ -1,23 +1,8 @@
 @import "tailwindcss" source(none);
 @import "tw-animate-css";
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap");
 @source "../src";
 
 @custom-variant dark (&:is(.dark *));
-
-/*
- * Design system definition.
- *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
- */
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -52,110 +37,67 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --font-display: "Cormorant Garamond", serif;
-  --font-sans: "Poppins", sans-serif;
+  --color-navy: var(--navy);
+  --color-navy-light: var(--navy-light);
   --color-gold: var(--gold);
-  --color-gold-foreground: var(--gold-foreground);
-  --color-ink: var(--ink);
+  --color-gold-light: var(--gold-light);
+  --font-display: "Playfair Display", serif;
+  --font-sans: "Inter", sans-serif;
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(0.984 0.004 252);
-  --foreground: oklch(0.22 0.035 255);
-  --ink: oklch(0.23 0.055 255);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.035 255);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.035 255);
-  --primary: oklch(0.49 0.142 256);
-  --primary-foreground: oklch(0.99 0.004 252);
-  --secondary: oklch(0.962 0.012 252);
-  --secondary-foreground: oklch(0.27 0.045 255);
-  --muted: oklch(0.968 0.01 252);
-  --muted-foreground: oklch(0.5 0.035 254);
-  --accent: oklch(0.57 0.135 252);
-  --accent-foreground: oklch(0.99 0.004 252);
-  --gold: oklch(0.47 0.138 256);
-  --gold-foreground: oklch(0.99 0.004 252);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.9 0.014 252);
-  --input: oklch(0.93 0.012 252);
-  --ring: oklch(0.57 0.135 252);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
-}
-
-.dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  --radius: 0.75rem;
+  /* Premium navy from Starlink Jewels logo */
+  --navy: #0D1E52;
+  --navy-light: #1A3179;
+  /* Warm gold accent for jewelry luxury */
+  --gold: #C9A84C;
+  --gold-light: #E8C96A;
+  /* Backgrounds */
+  --background: #F5F4F0;
+  --foreground: #0D1E52;
+  --card: #FFFFFF;
+  --card-foreground: #1A1A2E;
+  --popover: #FFFFFF;
+  --popover-foreground: #1A1A2E;
+  --primary: #0D1E52;
+  --primary-foreground: #FFFFFF;
+  --secondary: #EEF0F8;
+  --secondary-foreground: #0D1E52;
+  --muted: #F0EFF0;
+  --muted-foreground: #6B7280;
+  --accent: #C9A84C;
+  --accent-foreground: #FFFFFF;
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --border: #E2E1DC;
+  --input: #F0EFF0;
+  --ring: #0D1E52;
+  --chart-1: #C9A84C;
+  --chart-2: #0D1E52;
+  --chart-3: #1A3179;
+  --chart-4: #E8C96A;
+  --chart-5: #6B7280;
 }
 
 @layer base {
   * {
-    border-color: var(--color-border);
+    border-color: var(--border);
+    box-sizing: border-box;
   }
 
   html {
-    background-color: var(--color-background);
+    background-color: var(--background);
+    scroll-behavior: smooth;
   }
 
   body {
     min-height: 100vh;
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+    background-color: var(--background);
+    color: var(--foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, .font-display {
@@ -165,35 +107,138 @@
 }
 
 @layer utilities {
-  .app-shell {
-    margin-inline: auto;
-    width: min(100%, 96rem);
-    padding-inline: clamp(1rem, 2vw, 2rem);
-  }
-
-  .app-shell-wide {
-    margin-inline: auto;
-    width: min(100%, 108rem);
-    padding-inline: clamp(1rem, 2vw, 2rem);
-  }
-
-  .brand-header {
-    background:
-      radial-gradient(circle at top right, oklch(0.74 0.08 248 / 0.16), transparent 26%),
-      radial-gradient(circle at left center, oklch(0.78 0.06 248 / 0.12), transparent 22%),
-      linear-gradient(180deg, oklch(0.992 0.004 252) 0%, oklch(0.976 0.012 250) 100%);
-  }
-
-  .text-gold { color: var(--gold); }
+  /* ── Brand colors ── */
+  .bg-navy { background-color: var(--navy); }
+  .bg-navy-light { background-color: var(--navy-light); }
+  .text-navy { color: var(--navy); }
+  .border-navy { border-color: var(--navy); }
   .bg-gold { background-color: var(--gold); }
+  .text-gold { color: var(--gold); }
   .border-gold { border-color: var(--gold); }
-  .gold-gradient {
-    background: linear-gradient(135deg, oklch(0.58 0.14 251) 0%, oklch(0.46 0.13 257) 100%);
+
+  /* ── Gradients ── */
+  .navy-gradient {
+    background: linear-gradient(135deg, #0D1E52 0%, #1A3179 60%, #0F2460 100%);
   }
-  .gold-text-gradient {
-    background: linear-gradient(135deg, oklch(0.58 0.14 251) 0%, oklch(0.43 0.12 257) 100%);
+  .gold-gradient {
+    background: linear-gradient(135deg, #C9A84C 0%, #E8C96A 50%, #C9A84C 100%);
+  }
+  .navy-to-gold {
+    background: linear-gradient(135deg, #0D1E52 0%, #1A3179 100%);
+  }
+
+  /* ── Premium card ── */
+  .card-premium {
+    background: #FFFFFF;
+    border: 1px solid #E8E6E0;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(13,30,82,0.06), 0 4px 16px rgba(13,30,82,0.06);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .card-premium:hover {
+    box-shadow: 0 4px 12px rgba(13,30,82,0.10), 0 12px 32px rgba(13,30,82,0.10);
+    transform: translateY(-1px);
+  }
+  .card-premium-static {
+    background: #FFFFFF;
+    border: 1px solid #E8E6E0;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(13,30,82,0.06), 0 4px 16px rgba(13,30,82,0.06);
+  }
+
+  /* ── Buttons ── */
+  .btn-navy {
+    background: linear-gradient(135deg, #0D1E52 0%, #1A3179 100%);
+    color: #FFFFFF;
+    border: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    font-family: var(--font-sans);
+  }
+  .btn-navy:hover:not(:disabled) {
+    background: linear-gradient(135deg, #1A3179 0%, #0D1E52 100%);
+    box-shadow: 0 4px 16px rgba(13,30,82,0.35);
+    transform: translateY(-1px);
+  }
+  .btn-navy:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .btn-gold {
+    background: linear-gradient(135deg, #C9A84C 0%, #E8C96A 100%);
+    color: #0D1E52;
+    border: none;
+    font-weight: 700;
+    transition: all 0.2s ease;
+    font-family: var(--font-sans);
+  }
+  .btn-gold:hover:not(:disabled) {
+    box-shadow: 0 4px 16px rgba(201,168,76,0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: #4B5563;
+    border: 1.5px solid #D1D0CC;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  .btn-outline:hover:not(:disabled) {
+    background: #F5F4F0;
+    border-color: #0D1E52;
+    color: #0D1E52;
+  }
+
+  /* ── Form inputs ── */
+  .input-premium {
+    width: 100%;
+    height: 2.875rem;
+    padding: 0 1rem;
+    border: 1.5px solid #D1D0CC;
+    border-radius: 0.625rem;
+    background: #FAFAF8;
+    color: #1A1A2E;
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .input-premium:focus {
+    border-color: #0D1E52;
+    box-shadow: 0 0 0 3px rgba(13,30,82,0.08);
+    background: #FFFFFF;
+  }
+  .input-premium::placeholder { color: #9CA3AF; }
+
+  /* ── Status badges ── */
+  .status-draft    { background: #F3F4F6; color: #6B7280; border: 1px solid #E5E7EB; }
+  .status-sent     { background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; }
+  .status-changes  { background: #FFFBEB; color: #B45309; border: 1px solid #FDE68A; }
+  .status-approved { background: #F0FDF4; color: #15803D; border: 1px solid #BBF7D0; }
+  .status-completed { background: #0D1E52; color: #FFFFFF; border: 1px solid #0D1E52; }
+
+  /* ── Page shell ── */
+  .page-shell {
+    max-width: 1400px;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 3vw, 2.5rem);
+  }
+
+  /* ── Gold text gradient ── */
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #C9A84C 0%, #E8C96A 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+
+  /* ── Decorative diamond ── */
+  .diamond-pattern {
+    background-image: repeating-linear-gradient(
+      45deg,
+      rgba(201,168,76,0.04) 0px,
+      rgba(201,168,76,0.04) 1px,
+      transparent 1px,
+      transparent 12px
+    );
   }
 }
