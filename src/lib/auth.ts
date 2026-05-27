@@ -5,13 +5,12 @@ const STATIC_USERNAME = "admin";
 const STATIC_PASSWORD = "123";
 
 export async function login(username: string, password: string): Promise<void> {
-  if (username.trim() === STATIC_USERNAME && password === STATIC_PASSWORD) {
-    localStorage.setItem(KEY, "1");
-    localStorage.setItem(USER_KEY, STATIC_USERNAME);
-    window.dispatchEvent(new Event("starlink:auth-changed"));
-  } else {
+  if (username.trim() !== STATIC_USERNAME || password !== STATIC_PASSWORD) {
     throw new Error("Invalid username or password");
   }
+  localStorage.setItem(KEY, "1");
+  localStorage.setItem(USER_KEY, STATIC_USERNAME);
+  window.dispatchEvent(new Event("starlink:auth-changed"));
 }
 
 export async function logout(): Promise<void> {
