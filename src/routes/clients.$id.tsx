@@ -140,8 +140,7 @@ function ClientDetail() {
                 {client.name}
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-                Keep client information pinned on the left and manage quotations in a
-                dedicated scrollable workspace on the right.
+                All quotations for {client.name}. Create a new one or open an existing draft.
               </p>
             </div>
 
