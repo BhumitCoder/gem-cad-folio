@@ -20,28 +20,40 @@ export function AppHeader({
   containerClassName,
 }: AppHeaderProps) {
   return (
-    <header className={cn("ios-nav", sticky && "sticky top-0 z-30", className)}>
-      <div className={cn("ios-nav-inner", containerClassName)}>
+    <header className={cn("app-header", sticky && "sticky top-0 z-30", className)}>
+      <div className={cn("app-header-inner", containerClassName)}>
 
-        <div className="ios-nav-left">
-          {leftSlot && <div className="ios-nav-back">{leftSlot}</div>}
-          {!leftSlot && (
-            <Link to="/" className="ios-nav-brand">
+        {/* Left: back button OR brand */}
+        <div className="flex items-center gap-3 min-w-0">
+          {leftSlot ? (
+            <>
+              {leftSlot}
+              {title && (
+                <span
+                  className="hidden sm:block text-sm font-semibold text-white/70"
+                  style={{ borderLeft: "1px solid rgba(255,255,255,0.15)", paddingLeft: "0.75rem" }}
+                >
+                  {title}
+                </span>
+              )}
+            </>
+          ) : (
+            <Link to="/" className="app-header-brand">
               <img
                 src="/starlink-jewels-logo.png"
                 alt="Starlink Jewels"
-                className="ios-nav-logo"
+                className="app-header-logo"
               />
-              <span className="ios-nav-brand-name">Starlink Jewels</span>
+              <div className="app-header-brand-text">
+                <span className="app-header-brand-name">Starlink Jewels</span>
+                <span className="app-header-brand-sub">Quotation Portal</span>
+              </div>
             </Link>
           )}
         </div>
 
-        {title && (
-          <div className="ios-nav-title">{title}</div>
-        )}
-
-        <div className="ios-nav-right">
+        {/* Right */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           {rightSlot}
         </div>
 

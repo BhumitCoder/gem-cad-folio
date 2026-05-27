@@ -88,10 +88,10 @@ function ClientDetail() {
     .toUpperCase() || "?";
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--ios-bg)" }}>
+    <div className="min-h-screen" style={{ background: "var(--bg)" }}>
       <AppHeader
         leftSlot={
-          <Link to="/" className="flex items-center gap-1 text-sm font-medium" style={{ color: "#0D1E52" }}>
+          <Link to="/" className="header-back-btn">
             <ArrowLeft className="h-4 w-4" />
             <span>Clients</span>
           </Link>

@@ -65,7 +65,7 @@ export function QuotationEditor({ initial }: { initial: Quotation }) {
   const currentStep = STEPS.find((s) => s.n === step)!;
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "var(--ios-bg)" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--bg)" }}>
       {/* ── Header ── */}
       <AppHeader
         title="Quotation Builder"
@@ -73,8 +73,7 @@ export function QuotationEditor({ initial }: { initial: Quotation }) {
           <Link
             to={client ? "/clients/$id" : "/"}
             params={client ? { id: client.id } : undefined as never}
-            className="flex items-center gap-1 text-sm font-medium"
-            style={{ color: "#0D1E52" }}
+            className="header-back-btn"
           >
             <ArrowLeft className="h-4 w-4" />
             <span className="hidden sm:inline">{client ? (client.name || "Client") : "Clients"}</span>
@@ -83,23 +82,19 @@ export function QuotationEditor({ initial }: { initial: Quotation }) {
         }
         rightSlot={
           <div className="flex items-center gap-2">
-            <span className="hidden md:inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-mono font-semibold" style={{ background: "rgba(13,30,82,0.07)", color: "#0D1E52" }}>
+            <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded text-xs font-mono font-semibold" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.65)", border: "1px solid rgba(255,255,255,0.12)" }}>
               {q.quoteNo}
             </span>
-            <button
-              onClick={save}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition"
-              style={{ background: "rgba(13,30,82,0.07)", color: "#0D1E52" }}
-            >
-              <Save className="h-4 w-4" />
+            <button onClick={save} className="header-logout-btn">
+              <Save className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Save</span>
             </button>
             <button
               onClick={download}
               disabled={busy}
-              className="btn-gold flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm disabled:opacity-60"
+              className="header-action-btn"
             >
-              <Download className="h-4 w-4" />
+              <Download className="h-3.5 w-3.5" />
               <span>{busy ? "Generating…" : "Download PDF"}</span>
             </button>
           </div>
