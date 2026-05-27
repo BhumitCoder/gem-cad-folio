@@ -88,17 +88,15 @@ function ClientDetail() {
     .toUpperCase() || "?";
 
   return (
-    <div className="min-h-screen" style={{ background: "#F5F4F0" }}>
+    <div className="min-h-screen" style={{ background: "var(--ios-bg)" }}>
       <AppHeader
-        portalLabel="Client Details"
         leftSlot={
-          <Link to="/">
-            <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition text-sm font-medium">
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Back</span>
-            </button>
+          <Link to="/" className="flex items-center gap-1 text-sm font-medium" style={{ color: "#0D1E52" }}>
+            <ArrowLeft className="h-4 w-4" />
+            <span>Clients</span>
           </Link>
         }
+        title="Client Details"
       />
 
       <main className="page-shell py-8 space-y-6">

@@ -65,30 +65,31 @@ export function QuotationEditor({ initial }: { initial: Quotation }) {
   const currentStep = STEPS.find((s) => s.n === step)!;
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#F5F4F0" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--ios-bg)" }}>
       {/* ── Header ── */}
       <AppHeader
-        portalLabel="Quotation Builder"
+        title="Quotation Builder"
         leftSlot={
           <Link
             to={client ? "/clients/$id" : "/"}
             params={client ? { id: client.id } : undefined as never}
+            className="flex items-center gap-1 text-sm font-medium"
+            style={{ color: "#0D1E52" }}
           >
-            <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition text-sm font-medium">
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">{client ? (client.name || "Client") : "Clients"}</span>
-              <span className="sm:hidden">Back</span>
-            </button>
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">{client ? (client.name || "Client") : "Clients"}</span>
+            <span className="sm:hidden">Back</span>
           </Link>
         }
         rightSlot={
           <div className="flex items-center gap-2">
-            <span className="hidden md:inline-flex items-center px-3 py-1.5 rounded-lg bg-white/10 text-white/80 text-xs font-mono font-semibold border border-white/10">
+            <span className="hidden md:inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-mono font-semibold" style={{ background: "rgba(13,30,82,0.07)", color: "#0D1E52" }}>
               {q.quoteNo}
             </span>
             <button
               onClick={save}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white/80 hover:text-white hover:bg-white/20 transition text-sm font-medium"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition"
+              style={{ background: "rgba(13,30,82,0.07)", color: "#0D1E52" }}
             >
               <Save className="h-4 w-4" />
               <span className="hidden sm:inline">Save</span>

@@ -39,24 +39,19 @@ function LoginPage() {
 
   return (
     <div className="login-page">
-      {/* Animated orb background */}
       <div className="login-orb login-orb-1" />
       <div className="login-orb login-orb-2" />
       <div className="login-orb login-orb-3" />
-
-      {/* Noise texture overlay */}
       <div className="login-noise" />
 
       <div className="login-content">
-        {/* Brand header */}
+        {/* Brand — logo image directly, no container box */}
         <div className="login-brand">
-          <div className="login-logo-wrap">
-            <img
-              src="/starlink-jewels-logo.png"
-              alt="Starlink Jewels"
-              className="login-logo-img"
-            />
-          </div>
+          <img
+            src="/starlink-jewels-logo.png"
+            alt="Starlink Jewels"
+            className="login-logo-img"
+          />
           <h1 className="login-brand-name">Starlink Jewels</h1>
           <div className="login-brand-divider">
             <span className="login-divider-line" />
@@ -109,21 +104,17 @@ function LoginPage() {
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={busy}
-              className="gold-btn"
-            >
+            <button type="submit" disabled={busy} className="gold-btn">
               {busy ? (
-                <span className="flex items-center gap-2">
+                <span className="flex items-center justify-center gap-2">
                   <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                   </svg>
-                  Signing in...
+                  Signing in…
                 </span>
               ) : (
-                <span className="flex items-center gap-2">
+                <span className="flex items-center justify-center gap-2">
                   <LogIn className="h-4 w-4" />
                   Sign In
                 </span>

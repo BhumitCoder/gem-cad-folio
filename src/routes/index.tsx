@@ -80,11 +80,13 @@ function Dashboard() {
       <div className="dash-bg-orb-2" />
 
       <AppHeader
-        portalLabel="Quotation Portal"
         rightSlot={
           <button
             onClick={() => { logout(); navigate({ to: "/login" }); }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition text-sm font-medium"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition"
+            style={{ color: "rgba(60,60,67,0.6)" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "#0D1E52")}
+            onMouseLeave={e => (e.currentTarget.style.color = "rgba(60,60,67,0.6)")}
           >
             <LogOut className="h-4 w-4" />
             <span>Logout</span>
