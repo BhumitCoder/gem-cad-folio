@@ -77,7 +77,6 @@ function Dashboard() {
   return (
     <div className="min-h-screen" style={{ background: "#F5F4F0" }}>
       <AppHeader
-        sticky
         portalLabel="Quotation Portal"
         rightSlot={
           <button

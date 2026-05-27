@@ -47,14 +47,11 @@
 
 :root {
   --radius: 0.75rem;
-  /* Premium navy from Starlink Jewels logo */
   --navy: #0D1E52;
   --navy-light: #1A3179;
-  /* Warm gold accent for jewelry luxury */
   --gold: #C9A84C;
   --gold-light: #E8C96A;
-  /* Backgrounds */
-  --background: #F5F4F0;
+  --background: #EDECEA;
   --foreground: #0D1E52;
   --card: #FFFFFF;
   --card-foreground: #1A1A2E;
@@ -70,7 +67,7 @@
   --accent-foreground: #FFFFFF;
   --destructive: #DC2626;
   --destructive-foreground: #FFFFFF;
-  --border: #E2E1DC;
+  --border: #DDDBD5;
   --input: #F0EFF0;
   --ring: #0D1E52;
   --chart-1: #C9A84C;
@@ -104,6 +101,26 @@
     font-family: var(--font-display);
     letter-spacing: 0.01em;
   }
+
+  /* ── Custom scrollbar ── */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #EDECEA;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #0D1E52;
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #C9A84C;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #0D1E52 #EDECEA;
+  }
 }
 
 @layer utilities {
@@ -118,7 +135,7 @@
 
   /* ── Gradients ── */
   .navy-gradient {
-    background: linear-gradient(135deg, #0D1E52 0%, #1A3179 60%, #0F2460 100%);
+    background: linear-gradient(90deg, #0D1E52 0%, #0F2460 50%, #0D1E52 100%);
   }
   .gold-gradient {
     background: linear-gradient(135deg, #C9A84C 0%, #E8C96A 50%, #C9A84C 100%);
@@ -130,20 +147,21 @@
   /* ── Premium card ── */
   .card-premium {
     background: #FFFFFF;
-    border: 1px solid #E8E6E0;
-    border-radius: 1rem;
-    box-shadow: 0 1px 3px rgba(13,30,82,0.06), 0 4px 16px rgba(13,30,82,0.06);
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
+    border: 1px solid #E0DED8;
+    border-radius: 0.875rem;
+    box-shadow: 0 1px 2px rgba(13,30,82,0.04), 0 3px 12px rgba(13,30,82,0.05);
+    transition: box-shadow 0.2s ease, transform 0.18s ease, border-color 0.2s ease;
   }
   .card-premium:hover {
-    box-shadow: 0 4px 12px rgba(13,30,82,0.10), 0 12px 32px rgba(13,30,82,0.10);
-    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(13,30,82,0.10), 0 16px 40px rgba(13,30,82,0.08);
+    border-color: #C9A84C40;
+    transform: translateY(-2px);
   }
   .card-premium-static {
     background: #FFFFFF;
-    border: 1px solid #E8E6E0;
-    border-radius: 1rem;
-    box-shadow: 0 1px 3px rgba(13,30,82,0.06), 0 4px 16px rgba(13,30,82,0.06);
+    border: 1px solid #E0DED8;
+    border-radius: 0.875rem;
+    box-shadow: 0 1px 2px rgba(13,30,82,0.04), 0 3px 12px rgba(13,30,82,0.05);
   }
 
   /* ── Buttons ── */
@@ -157,7 +175,7 @@
   }
   .btn-navy:hover:not(:disabled) {
     background: linear-gradient(135deg, #1A3179 0%, #0D1E52 100%);
-    box-shadow: 0 4px 16px rgba(13,30,82,0.35);
+    box-shadow: 0 4px 18px rgba(13,30,82,0.35);
     transform: translateY(-1px);
   }
   .btn-navy:disabled { opacity: 0.55; cursor: not-allowed; }
@@ -178,7 +196,7 @@
   .btn-outline {
     background: transparent;
     color: #4B5563;
-    border: 1.5px solid #D1D0CC;
+    border: 1.5px solid #CCCAC4;
     font-weight: 500;
     transition: all 0.2s ease;
   }
@@ -209,6 +227,27 @@
   }
   .input-premium::placeholder { color: #9CA3AF; }
 
+  /* ── Login input (dark theme) ── */
+  .login-input {
+    width: 100%;
+    height: 2.875rem;
+    padding: 0 1rem;
+    border: 1.5px solid rgba(255,255,255,0.10);
+    border-radius: 0.625rem;
+    background: rgba(255,255,255,0.06);
+    color: #FFFFFF;
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  }
+  .login-input:focus {
+    border-color: rgba(201,168,76,0.5);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+    background: rgba(255,255,255,0.09);
+  }
+  .login-input::placeholder { color: rgba(255,255,255,0.25); }
+
   /* ── Status badges ── */
   .status-draft    { background: #F3F4F6; color: #6B7280; border: 1px solid #E5E7EB; }
   .status-sent     { background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; }
@@ -220,7 +259,7 @@
   .page-shell {
     max-width: 1400px;
     margin-inline: auto;
-    padding-inline: clamp(1rem, 3vw, 2.5rem);
+    padding-inline: clamp(1.5rem, 3vw, 3rem);
   }
 
   /* ── Gold text gradient ── */

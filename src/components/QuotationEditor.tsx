@@ -68,7 +68,6 @@ export function QuotationEditor({ initial }: { initial: Quotation }) {
     <div className="min-h-screen flex flex-col" style={{ background: "#F5F4F0" }}>
       {/* ── Header ── */}
       <AppHeader
-        sticky
         portalLabel="Quotation Builder"
         leftSlot={
           <Link

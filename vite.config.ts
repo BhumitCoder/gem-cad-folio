@@ -14,4 +14,9 @@ export default defineConfig({
     tailwindcss(),
     tsconfigPaths(),
   ],
+  server: {
+    port: 5000,
+    host: true,
+    allowedHosts: true,
+  },
 });
