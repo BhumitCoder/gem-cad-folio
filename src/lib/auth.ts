@@ -1,38 +1,23 @@
-import {
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut,
-} from "firebase/auth";
-import { auth } from "./firebase";
-
 const KEY = "starlink_auth_v1";
+const USER_KEY = "starlink_user_email";
 
-// Mirror Firebase auth state into localStorage so synchronous isAuthed()
-// works on first render (before Firebase restores the session).
-if (typeof window !== "undefined") {
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      localStorage.setItem(KEY, "1");
-      localStorage.setItem("starlink_user_email", user.email ?? "");
-    } else {
-      localStorage.removeItem(KEY);
-      localStorage.removeItem("starlink_user_email");
-    }
+const STATIC_USERNAME = "admin";
+const STATIC_PASSWORD = "123";
+
+export async function login(username: string, password: string): Promise<void> {
+  if (username.trim() === STATIC_USERNAME && password === STATIC_PASSWORD) {
+    localStorage.setItem(KEY, "1");
+    localStorage.setItem(USER_KEY, STATIC_USERNAME);
     window.dispatchEvent(new Event("starlink:auth-changed"));
-  });
-}
-
-export async function login(email: string, password: string): Promise<void> {
-  await signInWithEmailAndPassword(auth, email.trim(), password);
-}
-
-export async function signup(email: string, password: string): Promise<void> {
-  await createUserWithEmailAndPassword(auth, email.trim(), password);
+  } else {
+    throw new Error("Invalid username or password");
+  }
 }
 
 export async function logout(): Promise<void> {
-  await signOut(auth);
+  localStorage.removeItem(KEY);
+  localStorage.removeItem(USER_KEY);
+  window.dispatchEvent(new Event("starlink:auth-changed"));
 }
 
 export function isAuthed(): boolean {
@@ -42,5 +27,5 @@ export function isAuthed(): boolean {
 
 export function currentUserEmail(): string {
   if (typeof window === "undefined") return "";
-  return localStorage.getItem("starlink_user_email") ?? "";
+  return localStorage.getItem(USER_KEY) ?? "";
 }
