@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { isAuthed } from "@/lib/auth";
+import { useDataRefresh } from "@/hooks/useDataRefresh";
 import { getClient, upsertClient, type Client } from "@/lib/clients";
 import {
   listByClient,
@@ -52,6 +53,7 @@ const STATUS_STYLE: Record<QuotationStatus, string> = {
 
 function ClientDetail() {
   const navigate = useNavigate();
+  useDataRefresh();
   const { id } = Route.useParams();
   const [client, setClient] = useState<Client | null>(null);
   const [quotes, setQuotes] = useState<Quotation[]>([]);
@@ -62,14 +64,15 @@ function ClientDetail() {
       navigate({ to: "/login" });
       return;
     }
-    const currentClient = getClient(id);
-    if (!currentClient) {
-      toast.error("Client not found");
-      navigate({ to: "/" });
-      return;
-    }
-    setClient(currentClient);
-    setQuotes(listByClient(id));
+    const refresh = () => {
+      const currentClient = getClient(id);
+      if (!currentClient) return;
+      setClient(currentClient);
+      setQuotes(listByClient(id));
+    };
+    refresh();
+    window.addEventListener("starlink:data-changed", refresh);
+    return () => window.removeEventListener("starlink:data-changed", refresh);
   }, [id, navigate]);
 
   const sorted = useMemo(
@@ -137,8 +140,7 @@ function ClientDetail() {
                 {client.name}
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-                Keep client information pinned on the left and manage quotations in a
-                dedicated scrollable workspace on the right.
+                All quotations for {client.name}. Create a new one or open an existing draft.
               </p>
             </div>
 

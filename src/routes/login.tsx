@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { isAuthed, login } from "@/lib/auth";
+import { isAuthed, login, signup } from "@/lib/auth";
 
 import { toast } from "sonner";
 
@@ -14,12 +14,38 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const [u, setU] = useState("admin");
-  const [p, setP] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (isAuthed()) navigate({ to: "/" });
   }, [navigate]);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !password) {
+      toast.error("Enter email and password");
+      return;
+    }
+    setBusy(true);
+    try {
+      if (mode === "signin") {
+        await login(email, password);
+        toast.success("Welcome back");
+      } else {
+        await signup(email, password);
+        toast.success("Account created");
+      }
+      navigate({ to: "/" });
+    } catch (err) {
+      const msg = (err as Error)?.message || "Authentication failed";
+      toast.error(msg.replace("Firebase: ", ""));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background">
@@ -41,31 +67,23 @@ function LoginPage() {
               />
             </div>
             <h1 className="mt-6 font-display text-4xl text-foreground">
-              Sign in
+              {mode === "signin" ? "Sign in" : "Create account"}
             </h1>
             <p className="mt-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-              Internal Sales Portal
+              Starlink Jewels Portal
             </p>
           </div>
-          <form
-            className="space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (login(u, p)) {
-                toast.success("Welcome back");
-                navigate({ to: "/" });
-              } else {
-                toast.error("Invalid credentials");
-              }
-            }}
-          >
+          <form className="space-y-4" onSubmit={submit}>
             <div>
               <Label className="mb-1.5 block text-xs uppercase tracking-wider text-muted-foreground">
-                Username
+                Email
               </Label>
               <Input
-                value={u}
-                onChange={(e) => setU(e.target.value)}
+                type="email"
+                autoComplete="email"
+                placeholder="you@starlinkjewels.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="h-11 border-border bg-white/90 text-foreground placeholder:text-muted-foreground/70"
               />
             </div>
@@ -75,19 +93,29 @@ function LoginPage() {
               </Label>
               <Input
                 type="password"
-                value={p}
-                onChange={(e) => setP(e.target.value)}
+                autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                placeholder="At least 6 characters"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="h-11 border-border bg-white/90 text-foreground placeholder:text-muted-foreground/70"
               />
             </div>
             <Button
               type="submit"
+              disabled={busy}
               className="h-11 w-full gold-gradient text-white hover:opacity-90"
             >
-              Sign in
+              {busy ? "Please wait..." : mode === "signin" ? "Sign in" : "Create account"}
             </Button>
-            <p className="text-center text-[11px] text-muted-foreground">
-              Demo credentials: <span className="font-medium text-foreground">admin / 123</span>
+            <p className="text-center text-xs text-muted-foreground">
+              {mode === "signin" ? "First time here?" : "Already have an account?"}{" "}
+              <button
+                type="button"
+                onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+                className="font-medium text-primary hover:underline"
+              >
+                {mode === "signin" ? "Create an account" : "Sign in"}
+              </button>
             </p>
           </form>
         </div>

@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { isAuthed, logout } from "@/lib/auth";
+import { useDataRefresh } from "@/hooks/useDataRefresh";
 import {
   blankClient,
   loadAllClients,
@@ -48,6 +49,7 @@ export const Route = createFileRoute("/")({
 
 function Dashboard() {
   const navigate = useNavigate();
+  useDataRefresh();
   const [clients, setClients] = useState<Client[]>([]);
   const [quotes, setQuotes] = useState<Quotation[]>([]);
   const [ready, setReady] = useState(false);
@@ -60,9 +62,14 @@ function Dashboard() {
       navigate({ to: "/login" });
       return;
     }
-    setClients(loadAllClients());
-    setQuotes(loadAll());
-    setReady(true);
+    const refresh = () => {
+      setClients(loadAllClients());
+      setQuotes(loadAll());
+      setReady(true);
+    };
+    refresh();
+    window.addEventListener("starlink:data-changed", refresh);
+    return () => window.removeEventListener("starlink:data-changed", refresh);
   }, [navigate]);
 
   const filtered = useMemo(() => {
@@ -142,12 +149,18 @@ function Dashboard() {
                 Sales Workspace
               </div>
               <h1 className="mt-5 font-display text-5xl leading-none text-foreground sm:text-6xl">
-                Clients and quotations in one calm place.
+                Your clients and quotations.
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-                Track every client, monitor quotation progress, and jump into active
-                work without the page feeling crowded as your list grows.
+                Pick a client to create or view their quotations.
               </p>
+              <div className="mt-6">
+                <Link to="/quotation/new">
+                  <Button className="gold-gradient h-12 rounded-full px-6 text-white hover:opacity-90">
+                    <Plus className="mr-2 h-5 w-5" /> New Quotation
+                  </Button>
+                </Link>
+              </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3 xl:min-w-[420px]">
@@ -205,10 +218,10 @@ function Dashboard() {
             <div className="flex flex-col gap-4 border-b border-primary/10 pb-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <h2 className="font-display text-3xl text-foreground">
-                  Client Workspace
+                  Clients
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  A scrollable view built to stay manageable as your client list grows.
+                  Click any client to see their quotations.
                 </p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">

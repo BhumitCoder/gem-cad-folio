@@ -12,6 +12,8 @@ export interface Client {
 
 const KEY = "starlink_clients_v1";
 
+import { pushClient, removeClientRemote } from "./firebase-sync";
+
 export function loadAllClients(): Client[] {
   if (typeof window === "undefined") return [];
   try {
@@ -36,10 +38,12 @@ export function upsertClient(c: Client) {
   if (idx >= 0) all[idx] = c;
   else all.unshift(c);
   saveAllClients(all);
+  pushClient(c);
 }
 
 export function removeClient(id: string) {
   saveAllClients(loadAllClients().filter((c) => c.id !== id));
+  removeClientRemote(id);
 }
 
 export function blankClient(): Client {

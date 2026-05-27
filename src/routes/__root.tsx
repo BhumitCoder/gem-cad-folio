@@ -5,8 +5,10 @@ import {
   createRootRouteWithContext,
   useRouter,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
+import { initFirebaseSync } from "@/lib/firebase-sync";
 
 function NotFoundComponent() {
   return (
@@ -73,6 +75,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    initFirebaseSync();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

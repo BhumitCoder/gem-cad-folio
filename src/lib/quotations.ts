@@ -71,6 +71,8 @@ export interface Quotation {
 
 const KEY = "starlink_quotations_v1";
 
+import { pushQuotation, removeQuotationRemote } from "./firebase-sync";
+
 export function loadAll(): Quotation[] {
   if (typeof window === "undefined") return [];
   try {
@@ -95,10 +97,12 @@ export function upsert(q: Quotation) {
   if (idx >= 0) all[idx] = q;
   else all.unshift(q);
   saveAll(all);
+  pushQuotation(q);
 }
 
 export function remove(id: string) {
   saveAll(loadAll().filter((q) => q.id !== id));
+  removeQuotationRemote(id);
 }
 
 export function nextQuoteNo(): string {

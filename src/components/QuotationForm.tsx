@@ -108,9 +108,11 @@ function ImageField({
 export function QuotationForm({
   value,
   onChange,
+  step,
 }: {
   value: Quotation;
   onChange: (q: Quotation) => void;
+  step?: 1 | 2 | 3;
 }) {
   const update = (patch: Partial<Quotation>) => {
     onChange({ ...value, ...patch });
@@ -158,8 +160,11 @@ export function QuotationForm({
   const removePrice = (id: string) =>
     update({ prices: value.prices.filter((price) => price.id !== id) });
 
+  const show = (s: 1 | 2 | 3) => step === undefined || step === s;
+
   return (
     <div className="space-y-8">
+      {show(1) && (
       <section>
         <h3 className="mb-3 font-display text-lg">Customer & Quote Info</h3>
         <Row>
@@ -234,7 +239,9 @@ export function QuotationForm({
           </Field>
         </div>
       </section>
+      )}
 
+      {show(2) && (
       <section>
         <h3 className="mb-3 font-display text-lg">4 View CAD Images</h3>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -260,7 +267,9 @@ export function QuotationForm({
           />
         </div>
       </section>
+      )}
 
+      {show(2) && (
       <section>
         <h3 className="mb-3 font-display text-lg">Jewelry Specifications</h3>
         <Row>
@@ -288,7 +297,9 @@ export function QuotationForm({
           ))}
         </Row>
       </section>
+      )}
 
+      {show(2) && (
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h3 className="font-display text-lg">Diamond Breakdown</h3>
@@ -349,7 +360,9 @@ export function QuotationForm({
           ))}
         </div>
       </section>
+      )}
 
+      {show(3) && (
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h3 className="font-display text-lg">Price Breakdown</h3>
@@ -403,7 +416,9 @@ export function QuotationForm({
           </Row>
         </div>
       </section>
+      )}
 
+      {show(3) && (
       <section>
         <h3 className="mb-3 font-display text-lg">Terms & Notes</h3>
         <Field label="Terms (one per line)">
@@ -425,6 +440,7 @@ export function QuotationForm({
           </Field>
         </div>
       </section>
+      )}
     </div>
   );
 }
